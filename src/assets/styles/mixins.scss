@@ -1,0 +1,230 @@
+// Layout
+$gap    : 5px;
+$columns: 10;
+
+//  BreakPoints
+$bp_xs: 700px;
+$bp_sm: 900px;
+$bp_lg: 1200px;
+
+@mixin tiny {
+  @media only screen and (max-width: $bp_xs) {
+    @content;
+  }
+}
+
+@mixin small {
+  @media only screen and (max-width: $bp_sm) {
+    @content;
+  }
+}
+
+@mixin large {
+  @media only screen and (max-width: $bp_lg) {
+    @content;
+  }
+}
+
+.grid-center {
+  display        : grid;
+  align-content  : center;
+  justify-content: center;
+  align-items    : center;
+  justify-items  : center;
+}
+
+@mixin clampImageSize($width: 128px, $height: 128px) {
+  width : clamp(32px, #{$width}, 128px);
+  height: clamp(32px, #{$height}, 128px);
+}
+
+
+.full {
+  width: 100%;
+}
+
+//  Flexyflex
+.f-row {
+  position: relative;
+
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  gap: 0;
+
+  > * {
+    flex-basis: auto;
+  }
+
+  .grow {
+    flex-grow: 1;
+  }
+
+  &.nowrap {
+    flex-wrap: nowrap;
+  }
+
+
+  &.fd-col,
+  .fd-col {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.g-0 {
+  gap: 0;
+}
+
+.g-1 {
+  gap: $gap;
+}
+.g-2 {
+  gap: $gap * 2;
+}
+.g-3 {
+  gap: $gap * 3;
+}
+.g-4 {
+  gap: $gap * 4;
+}
+.g-5 {
+  gap: $gap * 5;
+}
+
+
+//  Justify
+.j-start {
+  justify-content: flex-start;
+}
+
+.j-end {
+  justify-content: flex-end;
+}
+
+.j-center {
+  justify-content: center;
+}
+
+.j-between {
+  justify-content: space-between;
+}
+
+.j-evenly {
+  justify-content: space-evenly;
+}
+
+
+//  Align
+.a-start {
+  align-items: flex-start;
+}
+
+.a-center {
+  align-items: center;
+}
+
+.a-stretch {
+  align-items: stretch;
+}
+
+.a-end {
+  align-items: flex-end;
+}
+
+
+//  Self
+.s-end {
+  justify-self: flex-end;
+}
+
+.s-center {
+  justify-self: center;
+}
+
+//  Columns
+@for $i from 1 through $columns {
+  .fb-#{$i} {
+    flex-basis: calc(10% * $i);
+
+    @include small {
+      flex-basis: 100%;
+    }
+
+    @include tiny() {
+      flex-basis: 100%;
+    }
+  }
+}
+
+
+//  Margin & Padding
+$spaceamounts: (0, 1, 2, 3, 5, 10);
+$sides       : (top, bottom, left, right, x, y);
+
+@each $space in $spaceamounts {
+  .m-#{$space} {
+    margin: #{$space * $gap} !important;
+  }
+
+  .p-#{$space} {
+    padding: #{$space * $gap} !important;
+  }
+
+  @each $side in $sides {
+    .m#{str-slice($side, 0, 1)}-#{$space} {
+      @if $side ==x {
+        margin-left: #{$space * $gap} !important;
+        margin-right: #{$space * $gap} !important;
+      } @else if $side ==y {
+        margin-top: #{$space * $gap} !important;
+        margin-bottom: #{$space * $gap} !important;
+      } @else {
+        margin-#{$side}: #{$space * $gap} !important;
+      }
+    }
+
+    .p#{str-slice($side, 0, 1)}-#{$space} {
+      @if $side ==x {
+        padding-left: #{$space * $gap} !important;
+        padding-right: #{$space * $gap} !important;
+      } @else if $side ==y {
+        padding-top: #{$space * $gap} !important;
+        padding-bottom: #{$space * $gap} !important;
+      } @else {
+        padding-#{$side}: #{$space * $gap} !important;
+      }
+    }
+  }
+}
+
+
+
+
+.grid {
+
+  display: grid;
+  gap: $gap * 2;
+  grid-template-columns: 1fr 1fr 1fr;
+
+  @for $i from 1 through $columns {
+    &.cols-#{$i} {
+      grid-template-columns: repeat($i 1fr);
+
+      // @include small {
+      //   flex-basis: 100%;
+      // }
+  
+      // @include tiny() {
+      //   flex-basis: 100%;
+      // }
+    }
+
+    &.rows-#{$i} {
+      grid-template-rows: repeat($i 1fr);
+    }
+  }
+}

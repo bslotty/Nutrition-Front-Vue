@@ -1,0 +1,81 @@
+
+
+:root {
+    /* Modes    */
+  // color-scheme: light dark;
+
+    /* Fonts */
+  --font-header       : "Poppins";
+  --font-body         : "Roboto";
+  --font-utility      : "Poppins";
+  --font-size         : 22px;
+  --font-weight-bold  : 600;
+  --font-weight-normal: 300;
+  --font-weight-light : 100;
+
+    /* Colors */
+  --color-primary    : #2960c7;
+  --color-primary-100: hsl(var(--color-primary) h calc(s - 80%) calc(l + 20%));
+  --color-primary-500: var(--color-primary);
+  --color-primary-700: hsl(var(--color-primary) h calc(s + 10%) calc(l - 10%));
+
+  --color-accent    : #248513;
+  --color-accent-100: hsl(var(--color-accent) h calc(s - 80%) calc(l + 20%));
+  --color-accent-500: var(--color-accent);
+  --color-accent-700: hsl(var(--color-accent) h calc(s + 10%) calc(l - 10%));
+
+  --color-warn    : #ac1111;
+  --color-warn-100: hsl(var(--color-warn) h calc(s - 80%) calc(l + 20%));
+  --color-warn-500: var(--color-warn);
+  --color-warn-700: hsl(var(--color-warn) h calc(s + 10%) calc(l - 10%));
+
+  --color-disabled: #ADADAD;
+  --color-bug     : #e3b315;
+
+    /* Backgrounds */
+  --bg-dark         : #2b2b2b;
+  --bg-dark-surface : #505050;
+  --bg-light        : hsl(0, 0%, 100%);
+  --bg-light-surface: #fff;
+  --bg-shade        : rgba(0, 0, 0, 0.2);
+
+  --bg-primary : hsl(from var(--color-primary) h s calc(l - 30%));
+  --bg-accent  : hsl(from var(--color-accent) h s calc(l - 5%));
+  --bg-warn    : hsl(from var(--color-warn) h s calc(l - 20%));
+  --bg-disabled: hsl(from var(--color-disabled) h s calc(l - 5%));
+  --bg-bug     : hsl(from var(--color-bug) h s calc(l - 5%));
+
+    /* Text */
+  --text-light    : #FFF;
+  --text-light-sub: #939799;
+  --text-dark     : #3a3a47;
+
+    /*  Shadow  */
+  --elevation-1: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+
+
+    /*  Bezier Presets  */
+    --bezier-overshoot: cubic-bezier(.09,.3,.31,1.27);
+    --bezier-snap     : cubic-bezier(.4,1.11,1,.73);
+
+
+
+
+    /*  Angular Colors */
+    --theme-primary : var(--color-primary);
+    --theme-accent  : var(--color-accent);
+    --theme-warn    : var(--color-warn);
+    --theme-disabled: var(--color-disabled);
+}
+
+.light {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}
+
+
+
+

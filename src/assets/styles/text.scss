@@ -1,0 +1,119 @@
+label,
+p,
+input {
+  margin-bottom: 0;
+
+  &.right {
+    text-align: end !important;
+  }
+
+  &.center {
+    text-align: center !important;
+  }
+
+  &.sm {
+    font-size: 0.9rem;
+  }
+
+  &.lg {
+    font-size: 1.3rem;
+  }
+
+  &.light {
+    color: var(--text-light);
+  }
+
+  &.dark {
+    color: var(--text-dark);
+  }
+
+  &.primary {
+    color: var(--color-primary);
+  }
+
+  &.accent {
+    color: var(--color-accent);
+  }
+
+  &.warn {
+    color: var(--color-warn);
+  }
+
+  &.disabled {
+    color: var(--color-disabled);
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-header);
+}
+
+label,
+p {
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+p {
+  margin-bottom: 0;
+  line-height: 1em;
+}
+
+h1,
+[class*="headline-1"] {
+  font-size: 3rem;
+  font-weight: 100;
+}
+
+h2,
+[class*="headline-2"] {
+  font-size: 2.5rem;
+  font-weight: 300;
+}
+
+h3,
+[class*="headline-3"] {
+  font-size: 2rem;
+  font-weight: 300;
+}
+
+h4,
+[class*="subtitle-1"] {
+  font-size: 1.5rem;
+  font-weight: 300;
+}
+
+h5,
+[class*="subtitle-2"] {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+p,
+label,
+[class*="body-1"] {
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+[class*="body-2"] {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+[class*="caption"] {
+  font-size: 1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}

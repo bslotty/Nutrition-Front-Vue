@@ -1,0 +1,40 @@
+// Seperator Colors
+hr {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  
+    border: none;
+    height: 2px;
+    width: 100%;
+    opacity: 0.7;
+  
+    background-color: var(--color-primary);
+  
+    &.small {
+      width: 75%;
+      left: 25%;
+    }
+  
+    &.dashed {
+      border-bottom-style: dashed;
+    }
+  
+    &[class*='primary'] {
+      background-color: var(--color-primary);
+    }
+  
+    &[class*='accent'] {
+      background-color: var(--color-accent);
+    }
+    &[class*='warn'] {
+      background-color: var(--color-warn);
+    }
+    &[class*='disabled'] {
+      background-color: var(--color-disabled);
+    }
+  
+    &[class*='light'] {
+      opacity: 0.3 !important;
+    }
+  }
+  

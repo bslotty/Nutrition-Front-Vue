@@ -1,0 +1,36 @@
+.material-symbols-outlined {
+  font-size    : 2em;
+  display      : grid;
+  place-content: center;
+
+  &.primary {
+    color: var(--color-primary);
+  }
+
+  &.accent,
+  &.success,
+  &.secondary {
+    color: var(--color-accent);
+  }
+
+  &.warn,
+  &.danger {
+    color: var(--color-warn);
+  }
+
+  &.disabled {
+    color: var(--color-disabled);
+  }
+
+  &.trophy {
+    color: hsl(51, 68%, 50%) !important;
+  }
+
+  &.light {
+    color: var(--text-light);
+  }
+
+  &.dark {
+    color: var(--text-dark);
+  }
+}

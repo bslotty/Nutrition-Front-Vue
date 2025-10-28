@@ -1,0 +1,249 @@
+@import url("https://fonts.googleapis.com/css?family=Poppins:wght@100;300;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;300;500&display=swap");
+
+@import "./mixins.scss";
+
+
+// @import "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0,0";
+
+
+
+//  Nutrient Colors
+$protein:    #4CAF50;
+$fat:        #2196F3;
+$carbs:      #FFA000;
+
+$sodium:    #795548;
+$sugar:     #F44336;
+$fiber:     #9C27B0;
+
+//  Lighter Nutrient Colors
+$protein-bg:    #4caf4f13;
+$fat-bg:        #2195f315;
+$carbs-bg:      #ffa20018;
+
+$sodium-bg:    #7955481e;
+$sugar-bg:     #f4433615;
+$fiber-bg:     #9b27b015;
+
+
+
+//  Page Setup
+* {
+  box-sizing: border-box;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--bg-light);
+  color: var(--text-dark);
+}
+
+body {
+  background: inherit;
+  color: inherit;
+  margin: 0 auto;
+  font-size: var(--font-size);
+
+  nav {
+    background: transparent;
+  }
+}
+
+
+
+img {
+  margin: 0 auto;
+  object-fit: contain;
+
+  &.square {
+    width: 96px;
+    height: 96px;
+
+    @include small() {
+      width: 64px;
+      height: 64px;
+    }
+
+    @include tiny() {
+      width: 32px;
+      height: 32px;
+    }
+  }
+}
+
+.container {
+  display: grid;
+
+  justify-content: center;
+  place-content: stretch;
+  gap: 10px;
+  margin: 0 auto;
+  width: clamp(300px, 98vw, 1200px);
+
+  @include tiny() {
+    width: 100%;
+  }
+}
+
+.card {
+  &.visible {
+    animation: animate__fadeOutDown 0.3s;
+    animation-iteration-count: 0;
+  }
+
+  &.project {
+    width: clamp(500px, 900px, 100%);
+  }
+}
+
+
+.shadow-inset {
+  box-shadow: inset 0px 0px 5px 1px var(--color-text-dark);
+
+  &.mat-primary {
+    box-shadow: inset 0px 0px 5px 1px var(--color-primary);
+  }
+
+  &.mat-accent {
+    box-shadow: inset 0px 0px 5px 1px var(--color-accent);
+  }
+
+  &.mat-warn {
+    box-shadow: inset 0px 0px 5px 1px rgba(var(--color-warn), 0.3);
+  }
+
+  &.mat-disabled {
+    box-shadow: inset 0px 0px 5px 1px var(--color-disabled);
+  }
+}
+
+
+
+.overflow-hide {
+  overflow: hidden;
+}
+
+
+
+
+
+
+.form-control {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 8px;
+  margin-top: 8px;
+  min-height: 70px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.05);
+
+  label {
+    color: inherit;
+    font-weight: 600;
+    font-size: 0.8em;
+  }
+
+  input {
+    border: none !important;
+    border-bottom: 1px solid !important;
+    background: transparent !important;
+    padding: 8px 0;
+    color: inherit;
+    width: 100%;
+
+    &:focus {
+      outline: none;
+      border-bottom: 2px solid !important;
+      
+    }
+  }
+
+  select {
+    border: none !important;
+    border-bottom: 1px solid !important;
+    background: transparent !important;
+    padding: 8px !important;
+
+    &:focus {
+      outline: none;
+      border-bottom: 2px solid !important;
+    }
+  }
+
+  
+
+  &.protein {
+    color: $protein;
+    background-color: $protein-bg !important;
+  }
+
+  &.fat {
+    color: $fat;
+    background-color: $fat-bg !important;
+  }
+
+  &.carbs {
+    color: $carbs;
+    background-color: $carbs-bg !important;
+  }
+
+  &.sodium {
+    color: $sodium;
+    background-color: $sodium-bg;
+  }
+
+  &.fiber {
+    color: $fiber;
+    background-color: $fiber-bg !important;
+  }
+
+  &.sugar {
+    color: $sugar;
+    background-color: $sugar-bg !important;
+  }
+}
+
+
+input.form-control {
+  border: none;
+  border-bottom: 1px solid;
+  padding: 10px 0px 3px 5px;
+  background: var(--bg-shade);
+  font-size: 1.2em;
+  width: 100%;
+}
+
+
+
+.food-card {
+  // border: 7px solid rgba(255,255,255, 0);
+  transition: all 0.2s ease-out;
+  z-index   : 5;
+  cursor    : pointer;
+  overflow  : hidden;
+  position  : relative;
+  flex-grow : 2;
+  box-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+}
+
+.food-card:hover {
+  box-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+}
+
+.food-nutrient-grid {
+  grid-template-columns: repeat(2, minmax(30%, 1fr));
+  // column-gap: 40%;
+
+  @include small() {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.bg-light {
+  background: var(--bg-light);
+}

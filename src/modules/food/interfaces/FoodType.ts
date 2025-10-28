@@ -1,0 +1,1 @@
+export type FoodType = 'simple' | 'compound';
