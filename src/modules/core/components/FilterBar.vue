@@ -54,10 +54,12 @@ const sortOptions = computed(() => {
 // Methods
 function flipSortDirection() {
   options.sort.direction = isAscending.value ? SortDirection.Desc : SortDirection.Asc;
+  console.log('🔔 EMIT filter-changed (flipSortDirection)');
   emit('filter-changed');
 }
 
 function onSortColumnChange() {
+  console.log('🔔 EMIT filter-changed (onSortColumnChange)');
   emit('filter-changed');
 }
 
@@ -70,6 +72,7 @@ function addSearchTerm() {
       options.search = term;
     }
     newSearchTerm.value = "";
+    console.log('🔔 EMIT filter-changed (addSearchTerm)');
     emit('filter-changed');
   }
 }
@@ -77,12 +80,14 @@ function addSearchTerm() {
 function removeSearchTerm(term: string) {
   const terms = activeSearchTerms.value.filter(t => t !== term);
   options.search = terms.join(',');
+  console.log('🔔 EMIT filter-changed (removeSearchTerm)');
   emit('filter-changed');
 }
 
 function onDateRangeChange() {
   if (options.range) {
     options.range.active = true;
+    console.log('🔔 EMIT filter-changed (onDateRangeChange)');
     emit('filter-changed');
   }
 }
@@ -93,6 +98,7 @@ function page(dir: "next" | "prev") {
   } else {
     options.page.prevResults();
   }
+  console.log('🔔 EMIT filter-changed (page)');
   emit('filter-changed');
 }
 </script>

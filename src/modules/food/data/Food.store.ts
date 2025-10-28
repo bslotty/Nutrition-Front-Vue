@@ -2,27 +2,34 @@ import { ref, computed, watch, type Ref } from "vue";
 import { defineStore } from "pinia";
 import { FoodService } from "./FoodService";
 import type { Food } from "../models/Food";
-import type { FilterOptions } from "@/modules/core/models/filter_options";
+import { FilterOptions } from "@/modules/core/models/filter_options";
+import { Sort, SortDirection } from "@/modules/core/models/sort";
+import { FoodSortFields } from "../enums/FoodSortFields";
 
 export const useFoodStore = defineStore("foods", () => {
   let food$ = new FoodService();
   let list: Ref<Food[]> = ref([]);
-  let options: FilterOptions;
+  
+  const options = ref(new FilterOptions());
+  
+  options.value.sort = new Sort(
+    FoodSortFields.protein,
+    SortDirection.Asc,
+    FoodSortFields
+  );
+  options.value.setPreset('all');
 
-  function setFilterOptions(o: FilterOptions) {
-    options = o;
-  }
-
-  watch(list, () => {
-    console.log("FoodStore.watch(list): ", list, options);
+  const filteredList = computed(() => {
+    let f = options.value.searchList<Food>(list.value);
+    f = options.value.sortList(f);
+    return f;
   });
 
   function getList() {
     return food$.getListFromServer().then((l) => {
-      console.log("FoodStore.getList()", l);
       list.value = l;
     });
   }
 
-  return { list, getList, food$ };
+  return { list, filteredList, options, getList, food$ };
 });

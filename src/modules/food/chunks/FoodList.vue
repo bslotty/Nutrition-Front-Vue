@@ -1,48 +1,21 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted } from "vue";
+import { storeToRefs } from "pinia";
 import { useFoodStore } from "../data/Food.store";
 import FoodCard from "../components/FoodCard.vue";
 import FilterBar from "@/modules/core/components/FilterBar.vue";
 import HeaderRow from "@/modules/core/components/HeaderRow.vue";
 import ListContainer from "@/modules/core/components/ListContainer.vue";
 import Button from "@/modules/core/components/Button.vue";
-import { FilterOptions } from "@/modules/core/models/filter_options";
-import { FoodSortFields } from "../enums/FoodSortFields";
-import { Sort, SortDirection } from "@/modules/core/models/sort";
-import type { Food } from "../models/Food";
 import { useDialog } from "@/modules/core/data/dialog.store";
 import router from "@/router";
 
 const $dialog = useDialog();
 const $foods = useFoodStore();
-const isLoading = ref(true);
-const foods = ref<Food[]>([]);
-
-const options = ref(new FilterOptions());
-
-// Set sort using Sort constructor
-options.value.sort = new Sort(
-  FoodSortFields.protein,
-  SortDirection.Asc,
-  FoodSortFields
-);
-
-options.value.setPreset('all');
-
-function refreshList() {
-  let f = options.value.searchList<Food>($foods.list);
-  f = options.value.sortList(f);
-  
-  isLoading.value = false;
-  foods.value = f;
-}
+const { filteredList, options } = storeToRefs($foods);
 
 onMounted(() => {
-  $foods.getList().then(() => refreshList());
-});
-
-watch($foods.list, () => {
-  refreshList();
+  $foods.getList();
 });
 
 function createSingle() {
@@ -54,8 +27,7 @@ function createMulti() {
 }
 
 function refresh() {
-  isLoading.value = true;
-  $foods.getList().then(() => refreshList());
+  $foods.getList();
 }
 </script>
 
@@ -87,12 +59,13 @@ function refresh() {
     </HeaderRow>
 
     <!-- Filter Bar -->
-    <FilterBar :options="options" @filter-changed="refreshList" />
+    <FilterBar :options="options" />
 
     <!-- Food List -->
     <ListContainer
-      :loading="isLoading"
-      :items="foods"
+      :key="`${filteredList.length}-${options.sort.active}-${options.sort.direction}-${filteredList[0]?.id}`"
+      :loading="false"
+      :items="filteredList"
       listClass="grid"
     >
       <template #list-item="{ item, index }">
