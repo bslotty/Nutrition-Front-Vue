@@ -1,0 +1,115 @@
+
+//  Nutrient Colors
+$protein:    #4CAF50;
+$fat:        #2196F3;
+$carbs:      #FFA000;
+
+$sodium:    #795548;
+$sugar:     #F44336;
+$fiber:     #9C27B0;
+
+//  Lighter Nutrient Colors
+$protein-bg:    #4caf4f13;
+$fat-bg:        #2195f315;
+$carbs-bg:      #ffa20018;
+
+$sodium-bg:    #7955481e;
+$sugar-bg:     #f4433615;
+$fiber-bg:     #9b27b015;
+
+input, select, .p-select {
+    border: none !important;
+    border-radius: 0;
+    border-bottom: 2px solid !important;
+    background: transparent !important;
+    padding: 8px 0px 2px 0px;
+    color: inherit;
+    width: 100%;
+}
+
+
+.form-control {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 8px;
+  margin-top: 8px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.05);
+
+  label {
+    color: inherit;
+    font-weight: 600;
+    font-size: 0.8em;
+  }
+
+  input {
+    border: none !important;
+    border-bottom: 1px solid !important;
+    background: transparent !important;
+    padding: 8px 0;
+    color: inherit;
+    width: 100%;
+
+    &:focus {
+      outline: none;
+      border-bottom: 2px solid !important;
+      
+    }
+  }
+
+  select {
+    border: none !important;
+    border-bottom: 1px solid !important;
+    background: transparent !important;
+    padding: 8px !important;
+
+    &:focus {
+      outline: none;
+      border-bottom: 2px solid !important;
+    }
+  }
+
+  
+
+  &.protein {
+    color: $protein;
+    background-color: $protein-bg !important;
+  }
+
+  &.fat {
+    color: $fat;
+    background-color: $fat-bg !important;
+  }
+
+  &.carbs {
+    color: $carbs;
+    background-color: $carbs-bg !important;
+  }
+
+  &.sodium {
+    color: $sodium;
+    background-color: $sodium-bg;
+  }
+
+  &.fiber {
+    color: $fiber;
+    background-color: $fiber-bg !important;
+  }
+
+  &.sugar {
+    color: $sugar;
+    background-color: $sugar-bg !important;
+  }
+}
+
+
+input.form-control {
+  border: none;
+  border-bottom: 1px solid;
+  padding: 10px 0px 3px 5px;
+  background: var(--bg-shade);
+  font-size: 1.2em;
+  width: 100%;
+}

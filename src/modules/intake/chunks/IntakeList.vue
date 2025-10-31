@@ -173,12 +173,12 @@ function handleFilterChange() {
           severity="primary"
           outlined
           @click="refresh()"
+          aria-label="Refresh"
         />
         <Button
-          label="Add Meal"
+          label="Meal"
           icon="pi pi-plus"
           severity="success"
-          outlined
           @click="createMeal()"
         />
       </template>

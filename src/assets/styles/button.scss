@@ -1,169 +1,18 @@
 a,
-button,
-.btn {
+button {
   text-decoration: none !important;
-  display: grid;
+  display: flex;
   place-content: center;
   justify-content: center;
-}
-
-button,
-a {
-  --bs-btn-padding-x: 0.5rem;
-  --bs-btn-padding-y: 0.5rem;
-  --bs-btn-border-radius: 50%;
-
-  display: grid;
-  place-items: center;
-
-  // width: 2.5rem;
-  // height: 2.5rem;
-
-  background: transparent;
-
-  box-shadow: 0px 0px 0px 0px transparent;
-  transition: box-shadow 200ms var(--bezier-snap);
-
-  border-radius: 50%;
-  border: none;
   padding: 0.5rem;
 
   cursor: pointer;
   * {
     cursor: pointer;
   }
-
-  /*  States  */
-  &:hover {
-    box-shadow: 0px 0px 3px 1px var(--bg-shade);
-  }
-  &:active {
-    box-shadow: inset 0px 0px 3px 1px var(--bg-shade);
-  }
-
-  /*  Colors  */
-  &[class*="primary"] {
-    background: var(--color-primary);
-  }
-
-  &[class*="accent"] {
-    background: var(--color-accent);
-  }
-
-  &[class*="warn"] {
-    background: var(--color-warn);
-  }
-
-  &[class*="disabled"] {
-    background: var(--color-disabled);
-  }
-
-  &[class*="light"] {
-    background: var(--bg-light);
-  }
-
-  &[class*="dark"] {
-    background: var(--bg-dark);
-  }
-
-  /*  Styles/Types  */
-  &[class*="fab"] {
-    span {
-      font-size: 2rem;
-    }
-  }
-
-  &[class*="raised"] {
-    border-radius: 4px;
-    width: initial;
-  }
-
-  &[class*="stroked"] {
-    border-radius: 4px;
-    background: transparent;
-    border: 2px solid var(--text-dark);
-
-    * {
-      color: inherit !important;
-    }
-
-    &[class*="primary"] {
-      color: var(--color-primary);
-      border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
-      
-      &:hover {
-        box-shadow: 0px 0px 3px 1px var(--color-primary);
-      }
-
-      &:active {
-        box-shadow: inset 0px 0px 3px 1px var(--color-primary);
-      }
-    }
-
-    &[class*="accent"] {
-      color: var(--color-accent);
-      border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-    }
-
-    &[class*="warn"] {
-      color: var(--color-warn);
-      border-color: color-mix(in srgb, var(--color-warn) 40%, transparent);
-    }
-
-    &[class*="disabled"] {
-      color: var(--color-disabled);
-      border-color: color-mix(in srgb, var(--color-disabled) 40%, transparent);
-    }
-
-    &[class*="light"] {
-      color: var(--text-light);
-      border-color: color-mix(in srgb, var(--bg-light) 40%, transparent);
-    }
-
-    &[class*="dark"] {
-      color: var(--text-dark);
-      border-color: color-mix(in srgb, var(--bg-dark) 40%, transparent);
-    }
-
-  }
-
-  &[class*="flat"] {
-    border-radius: 4px;
-    background: transparent;
-    border: none;
-
-    * {
-      color: inherit !important;
-    }
-
-    &[class*="primary"] {
-      color: var(--color-primary);
-    }
-
-    &[class*="accent"] {
-      color: var(--color-accent);
-    }
-
-    &[class*="warn"] {
-      color: var(--color-warn);
-    }
-
-    &[class*="disabled"] {
-      color: var(--color-disabled);
-    }
-
-    &[class*="light"] {
-      color: var(--text-light);
-    }
-
-    &[class*="dark"] {
-      color: var(--text-dark);
-    }
-  }
 }
 
-$colors: (primary, accent, warn, light, dark);
-
-@each $space in $colors {
-
+button {
+  min-height: 48px;
+  min-width: 48px;
 }

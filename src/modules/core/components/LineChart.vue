@@ -16,23 +16,24 @@ let chartOptions = {
     startup: true,
   },
 
-  width: 1200,
   height: 400,
 
   /*  Structure  */
   enableInteractivity: true,
   dynamicResize: true,
   chartArea: {
-    left: "0%",
-    top: "0%",
-    width: "100%",
-    height: "100%",
+    left: "1%",
+    top: "1%",
+    width: "98%",
+    height: "98%",
   },
   theme: "maximized",
 
   /*  Design  */
   backgroundColor: "transparent",
   colors: ["#4CAF50", "#2196F3", "#FFA000", "#9C27B0", "#F44336", "#FFEB3B"],
+  pointSize: 10,
+  pointShape: 'circle',
 
   tooltip: {
     // trigger: "none",
@@ -72,9 +73,8 @@ function parseClick(point: string) {
 </script>
 
 <template>
-  <div class="grid-center">
+  <div class="line-chart-container">
     <GChart
-      id="table"
       type="LineChart"
       :data="chartData"
       :options="chartOptions"
@@ -82,3 +82,7 @@ function parseClick(point: string) {
     />
   </div>
 </template>
+
+<style scoped>
+
+</style>

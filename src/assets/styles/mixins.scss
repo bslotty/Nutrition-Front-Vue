@@ -25,14 +25,6 @@ $bp_lg: 1200px;
   }
 }
 
-.grid-center {
-  display        : grid;
-  align-content  : center;
-  justify-content: center;
-  align-items    : center;
-  justify-items  : center;
-}
-
 @mixin clampImageSize($width: 128px, $height: 128px) {
   width : clamp(32px, #{$width}, 128px);
   height: clamp(32px, #{$height}, 128px);
@@ -204,27 +196,3 @@ $sides       : (top, bottom, left, right, x, y);
 
 
 
-.grid {
-
-  display: grid;
-  gap: $gap * 2;
-  grid-template-columns: 1fr 1fr 1fr;
-
-  @for $i from 1 through $columns {
-    &.cols-#{$i} {
-      grid-template-columns: repeat($i 1fr);
-
-      // @include small {
-      //   flex-basis: 100%;
-      // }
-  
-      // @include tiny() {
-      //   flex-basis: 100%;
-      // }
-    }
-
-    &.rows-#{$i} {
-      grid-template-rows: repeat($i 1fr);
-    }
-  }
-}

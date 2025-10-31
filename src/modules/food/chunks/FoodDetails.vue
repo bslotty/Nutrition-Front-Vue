@@ -9,12 +9,11 @@ import Card from 'primevue/card';
 import Divider from 'primevue/divider';
 import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
+import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import HeaderRow from '@/modules/core/components/HeaderRow.vue';
-import Button from '@/modules/core/components/Button.vue';
 import FormInput from '@/modules/core/components/FormInput.vue';
-import { MatColor } from '@/modules/core/enums/mat_color';
 
 // Reactive state
 const valid = ref(false);
@@ -235,18 +234,21 @@ function handleInput() {
       <template #title>{{ pageTitle }}</template>
       <template #actions>
         <Button
-          :iconName="isCreateMode ? 'close' : 'delete'"
-          :iconColor="isCreateMode ? MatColor.primary : MatColor.warn"
-          :bgColor="MatColor.transparent"
+          v-if="!isCreateMode"
+          icon="pi pi-trash"
+          severity="danger"
+          outlined
           @click="remove()"
-          :aria-label="isCreateMode ? 'Cancel' : 'Delete food'"
+          :disabled="loading"
+          aria-label="Delete food"
         />
         <Button
           label="Save"
-          iconName="check"
-          :iconColor="isFormValid ? MatColor.accent : MatColor.primary"
-          :bgColor="isFormValid ? MatColor.primary : MatColor.transparent"
+          icon="pi pi-check"
+          severity="success"
           @click="save()"
+          :disabled="!isFormValid || loading"
+          :loading="loading"
           :aria-label="isCreateMode ? 'Create food' : 'Save food'"
         />
       </template>
@@ -255,10 +257,9 @@ function handleInput() {
     <Card class="food-details-card">
       <template #content>
         <div class="food-grid">
-          <!-- Basic Information Section -->
-          <div class="f-col g-4">
-            <h4 class="text-primary m-0 mb-2">Basic Information</h4>
-            
+          <!-- Column 1: Basic Information -->
+          <div class="form-column-left">
+            <!-- Row 1: Brand -->
             <FormInput label="Brand" required>
               <template #input>
                 <InputText
@@ -269,6 +270,7 @@ function handleInput() {
               </template>
             </FormInput>
 
+            <!-- Row 2: Name -->
             <FormInput label="Name" required>
               <template #input>
                 <InputText
@@ -279,7 +281,8 @@ function handleInput() {
               </template>
             </FormInput>
 
-            <div class="f-row g-3">
+            <!-- Row 3: Serving Size + Unit -->
+            <div class="serving-row">
               <FormInput label="Serving Size" required>
                 <template #input>
                   <InputNumber
@@ -304,12 +307,10 @@ function handleInput() {
             </div>
           </div>
 
-          <!-- Nutritional Information Section -->
-          <div class="f-col g-4">
-            <h4 class="text-primary m-0 mb-2">Nutritional Information</h4>
-            
-            <!-- Macronutrients -->
-            <div class="f-row g-3">
+          <!-- Column 2: Nutritional Information -->
+          <div class="form-column-right">
+            <!-- Row 1: Protein, Fat, Carbs -->
+            <div class="nutrients-row">
               <FormInput>
                 <template #label>
                   <label class="block font-medium mb-2" style="color: #4CAF50;">
@@ -362,10 +363,8 @@ function handleInput() {
               </FormInput>
             </div>
 
-            <Divider />
-
-            <!-- Micronutrients -->
-            <div class="f-row g-3">
+            <!-- Row 2: Fiber, Sodium, Sugar -->
+            <div class="nutrients-row">
               <FormInput>
                 <template #label>
                   <label class="block font-medium mb-2" style="color: #9C27B0;">
@@ -375,23 +374,6 @@ function handleInput() {
                 <template #input>
                   <InputNumber
                     v-model="fiber"
-                    placeholder="0"
-                    :min="0"
-                    :maxFractionDigits="1"
-                    @input="handleInput"
-                  />
-                </template>
-              </FormInput>
-
-              <FormInput>
-                <template #label>
-                  <label class="block font-medium mb-2" style="color: #F44336;">
-                    <i class="pi pi-circle-fill mr-1"></i>Sugar (g)
-                  </label>
-                </template>
-                <template #input>
-                  <InputNumber
-                    v-model="sugar"
                     placeholder="0"
                     :min="0"
                     :maxFractionDigits="1"
@@ -412,6 +394,23 @@ function handleInput() {
                     placeholder="0"
                     :min="0"
                     :maxFractionDigits="0"
+                    @input="handleInput"
+                  />
+                </template>
+              </FormInput>
+
+              <FormInput>
+                <template #label>
+                  <label class="block font-medium mb-2" style="color: #F44336;">
+                    <i class="pi pi-circle-fill mr-1"></i>Sugar (g)
+                  </label>
+                </template>
+                <template #input>
+                  <InputNumber
+                    v-model="sugar"
+                    placeholder="0"
+                    :min="0"
+                    :maxFractionDigits="1"
                     @input="handleInput"
                   />
                 </template>
@@ -440,15 +439,42 @@ function handleInput() {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
 }
 
+.form-column-left,
+.form-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.serving-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+.nutrients-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
 // Custom nutrient color indicators
 .pi-circle-fill {
   font-size: 0.75rem;
+}
+
+// Responsive: Stack nutrient rows on mobile
+@media (max-width: 768px) {
+  .serving-row,
+  .nutrients-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

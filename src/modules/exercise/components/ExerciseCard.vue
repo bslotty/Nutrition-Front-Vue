@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Exercise } from '@/modules/exercise/models/Exercise';
+import { ExerciseName } from '@/modules/exercise/enums/ExerciseNames';
 
 const props = defineProps<{
     exercise: Exercise;
@@ -12,46 +13,58 @@ const emit = defineEmits<{
 function handleClick() {
     emit('click', props.exercise);
 }
+
+// Convert enum index to string
+const exerciseName = ExerciseName[props.exercise.name];
 </script>
 
 <template>
-    <div class="f-row fd-col a-center p-2 bg-light card" @click="handleClick">
-        <div>
-            <h4>{{ exercise.name }}</h4>
+    <div class="exercise-card" @click="handleClick">
+        <!-- Exercise Name -->
+        <div class="flex justify-content-center p-2">
+            <h4 class="m-0 text-xl font-semibold">{{ exerciseName }}</h4>
         </div>
 
-        <div class="f-row">
-            <div class="f-row fd-col p-1">
-                <label>Weight</label>
-                <label><b>{{ exercise.weight }}</b></label>
+        <!-- Weight, Sets, Reps Row -->
+        <div class="flex justify-content-around p-2">
+            <div class="flex flex-column align-items-center gap-1">
+                <span class="text-xs text-color-secondary font-medium">Weight</span>
+                <span class="text-lg font-bold">{{ exercise.weight }}</span>
             </div>
 
-            <div class="f-row fd-col p-1">
-                <label>Sets</label>
-                <label><b>{{ exercise.sets }}</b></label>
+            <div class="flex flex-column align-items-center gap-1">
+                <span class="text-xs text-color-secondary font-medium">Sets</span>
+                <span class="text-lg font-bold">{{ exercise.sets }}</span>
             </div>
 
-            <div class="f-row fd-col p-1">
-                <label>Reps</label>
-                <label><b>{{ exercise.reps }}</b></label>
+            <div class="flex flex-column align-items-center gap-1">
+                <span class="text-xs text-color-secondary font-medium">Reps</span>
+                <span class="text-lg font-bold">{{ exercise.reps }}</span>
             </div>
         </div>
 
-        <div class="j-center">
-            <h3>{{ exercise.getTotalWeightMoved() }} lbs</h3>
+        <!-- Total Weight -->
+        <div class="flex justify-content-center p-2 pt-0">
+            <h3 class="m-0 text-2xl font-bold text-primary">{{ exercise.getTotalWeightMoved() }} lbs</h3>
         </div>
     </div>
 </template>
 
 <style scoped>
-.card {
+.exercise-card {
     cursor: pointer;
     border-radius: 8px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    background: var(--surface-card);
+    box-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2),
+                0px 3px 4px 0px rgba(0, 0, 0, 0.14),
+                0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s ease-out;
 }
 
-.card:hover {
+.exercise-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+                0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+                0px 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 </style>

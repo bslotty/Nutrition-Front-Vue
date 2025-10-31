@@ -6,9 +6,8 @@
 @import "@/assets/styles/mixins.scss";
 @import "@/assets/styles/text.scss";
 @import "@/assets/styles/icons-google.scss";
-/* @import "@/assets/styles/button.scss"; */
+@import "@/assets/styles/input.scss";
+@import "@/assets/styles/button.scss";
 @import "@/assets/styles/keyframes.scss";
-
-@import "@/assets/styles/list-styles.scss";
 
 @import "@/assets/styles/styles.scss";

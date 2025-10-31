@@ -1,14 +1,18 @@
 <script lang="ts" setup>
 import { computed } from "vue";
-import Button from "@/modules/core/components/Button.vue";
+import Button from "primevue/button";
+import ConfirmDialog from "primevue/confirmdialog";
+import { useConfirm } from "primevue/useconfirm";
 import HeaderRow from "@/modules/core/components/HeaderRow.vue";
 import FormInput from "@/modules/core/components/FormInput.vue";
-import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
 import DatePicker from "primevue/datepicker";
 import { useDialog } from "@/modules/core/data/dialog.store";
+import { useWeightStore } from "../data/Weight.store";
 
 const $dialog = useDialog();
+const $weight = useWeightStore();
+const confirm = useConfirm();
 
 // Models
 const pounds = defineModel("pounds", { required: true, default: 0 });
@@ -18,7 +22,11 @@ const date = defineModel("date", { required: true, default: new Date() });
 pounds.value = $dialog.data.pounds || 0;
 date.value = $dialog.data.date ? new Date($dialog.data.date) : new Date();
 
-// Computed validation
+// Computed properties
+const isCreateMode = computed(() => {
+  return $dialog.data?.id === 'create';
+});
+
 const isValid = computed(() => {
   return pounds.value > 0 && date.value !== null;
 });
@@ -53,6 +61,27 @@ function handleClose() {
   $dialog.close();
 }
 
+function handleDelete() {
+  confirm.require({
+    message: 'Are you sure you want to delete this weight entry?',
+    header: 'Confirm Deletion',
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    accept: async () => {
+      try {
+        await $weight.weight$.delete();
+        if ($dialog.data?.onDelete) {
+          await $dialog.data.onDelete();
+        }
+        $dialog.close();
+      } catch (error) {
+        console.error('Failed to delete weight:', error);
+      }
+    }
+  });
+}
+
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === "Enter" && isValid.value) {
     handleSave();
@@ -67,6 +96,14 @@ function handleKeydown(event: KeyboardEvent) {
     <HeaderRow class="mb-3">
       <template #title>Weight Details</template>
       <template #actions>
+        <Button
+          v-if="!isCreateMode"
+          icon="pi pi-trash"
+          severity="danger"
+          outlined
+          @click="handleDelete"
+          aria-label="Delete weight"
+        />
         <Button
           icon="pi pi-check"
           severity="success"
@@ -123,5 +160,8 @@ function handleKeydown(event: KeyboardEvent) {
         </template>
       </FormInput>
     </div>
+
+    <!-- Confirmation dialog -->
+    <ConfirmDialog />
   </div>
 </template>

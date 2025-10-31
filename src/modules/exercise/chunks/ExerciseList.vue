@@ -83,20 +83,19 @@ function formatDate(date: Date): string {
     <HeaderRow>
       <template #title>Exercise List</template>
       <template #actions>
-        <button
-          @click="refresh()"
-          type="button"
-          class="icon-button"
-          aria-label="Refresh exercise list"
-          :disabled="isLoading"
-        >
-          <Icon name="refresh" :color="MatColor.primary" />
-        </button>
-        
-        <Button 
-          label="New Exercise"
-          icon="pi pi-plus"
+        <Button
+          icon="pi pi-refresh"
           severity="primary"
+          outlined
+          @click="refresh()"
+          :disabled="isLoading"
+          aria-label="Refresh"
+        />
+
+        <Button
+          label="Exercise"
+          icon="pi pi-plus"
+          severity="success"
           @click="createNewExercise()"
           :disabled="isLoading"
         />
@@ -199,7 +198,7 @@ function formatDate(date: Date): string {
 /* Exercise Grid */
 .exercise-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1rem;
 }
 </style>

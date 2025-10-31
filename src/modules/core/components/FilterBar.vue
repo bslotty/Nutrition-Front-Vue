@@ -104,7 +104,7 @@ function page(dir: "next" | "prev") {
 </script>
 
 <template>
-  <div class="flex justify-content-between align-items-center gap-1 px-2 py-1 surface-50 border-round mb-2">
+  <div class="flex justify-content-between align-items-center gap-1 mb-2">
     <!-- Left Section: Sort, Date Range, Filter Chips -->
     <div class="flex align-items-center gap-1 flex-1 overflow-x-auto">
       <!-- Sort Dropdown -->
@@ -212,21 +212,5 @@ function page(dir: "next" | "prev") {
 </template>
 
 <style scoped>
-.overflow-x-auto {
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
 
-.overflow-x-auto::-webkit-scrollbar {
-  height: 4px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb {
-  background: var(--surface-300);
-  border-radius: 4px;
-}
 </style>

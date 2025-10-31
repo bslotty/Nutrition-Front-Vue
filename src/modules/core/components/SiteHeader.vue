@@ -13,9 +13,9 @@ const route = useRoute();
 
 const navItems: NavItem[] = [
   { name: 'food-list', label: 'Foods', severity: 'primary' },
-  { name: 'intake-list', label: 'Intake', severity: 'secondary' },
-  { name: 'weight-list', label: 'Weight', severity: 'warning' },
-  { name: 'exercise-list', label: 'Exercise', severity: 'warning' }
+  { name: 'intake-list', label: 'Intake', severity: 'primary' },
+  { name: 'weight-list', label: 'Weight', severity: 'primary' },
+  { name: 'exercise-list', label: 'Exercise', severity: 'primary' }
 ];
 
 function navigateTo(routeName: string): void {

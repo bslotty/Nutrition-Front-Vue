@@ -46,33 +46,14 @@ body {
   color: inherit;
   margin: 0 auto;
   font-size: var(--font-size);
+  font-family: var(--font-body);
+
 
   nav {
     background: transparent;
   }
 }
 
-
-
-img {
-  margin: 0 auto;
-  object-fit: contain;
-
-  &.square {
-    width: 96px;
-    height: 96px;
-
-    @include small() {
-      width: 64px;
-      height: 64px;
-    }
-
-    @include tiny() {
-      width: 32px;
-      height: 32px;
-    }
-  }
-}
 
 .container {
   display: grid;
@@ -88,162 +69,22 @@ img {
   }
 }
 
-.card {
-  &.visible {
-    animation: animate__fadeOutDown 0.3s;
-    animation-iteration-count: 0;
-  }
+.grid {
+  display: grid !important;
+  margin-right: 0rem;
+  margin-left: 0rem;
+  margin-top: 0rem;
+  gap: 0.5rem;
 
-  &.project {
-    width: clamp(500px, 900px, 100%);
-  }
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 
-.shadow-inset {
-  box-shadow: inset 0px 0px 5px 1px var(--color-text-dark);
-
-  &.mat-primary {
-    box-shadow: inset 0px 0px 5px 1px var(--color-primary);
-  }
-
-  &.mat-accent {
-    box-shadow: inset 0px 0px 5px 1px var(--color-accent);
-  }
-
-  &.mat-warn {
-    box-shadow: inset 0px 0px 5px 1px rgba(var(--color-warn), 0.3);
-  }
-
-  &.mat-disabled {
-    box-shadow: inset 0px 0px 5px 1px var(--color-disabled);
-  }
+:root {
+  --p-card-shadow: none;
 }
 
-
-
-.overflow-hide {
-  overflow: hidden;
-}
-
-
-
-
-
-
-.form-control {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  padding: 8px;
-  margin-top: 8px;
-  min-height: 70px;
-  box-sizing: border-box;
-  background: rgba(0, 0, 0, 0.05);
-
-  label {
-    color: inherit;
-    font-weight: 600;
-    font-size: 0.8em;
-  }
-
-  input {
-    border: none !important;
-    border-bottom: 1px solid !important;
-    background: transparent !important;
-    padding: 8px 0;
-    color: inherit;
-    width: 100%;
-
-    &:focus {
-      outline: none;
-      border-bottom: 2px solid !important;
-      
-    }
-  }
-
-  select {
-    border: none !important;
-    border-bottom: 1px solid !important;
-    background: transparent !important;
-    padding: 8px !important;
-
-    &:focus {
-      outline: none;
-      border-bottom: 2px solid !important;
-    }
-  }
-
-  
-
-  &.protein {
-    color: $protein;
-    background-color: $protein-bg !important;
-  }
-
-  &.fat {
-    color: $fat;
-    background-color: $fat-bg !important;
-  }
-
-  &.carbs {
-    color: $carbs;
-    background-color: $carbs-bg !important;
-  }
-
-  &.sodium {
-    color: $sodium;
-    background-color: $sodium-bg;
-  }
-
-  &.fiber {
-    color: $fiber;
-    background-color: $fiber-bg !important;
-  }
-
-  &.sugar {
-    color: $sugar;
-    background-color: $sugar-bg !important;
-  }
-}
-
-
-input.form-control {
-  border: none;
-  border-bottom: 1px solid;
-  padding: 10px 0px 3px 5px;
-  background: var(--bg-shade);
-  font-size: 1.2em;
-  width: 100%;
-}
-
-
-
-.food-card {
-  // border: 7px solid rgba(255,255,255, 0);
-  transition: all 0.2s ease-out;
-  z-index   : 5;
-  cursor    : pointer;
-  overflow  : hidden;
-  position  : relative;
-  flex-grow : 2;
-  box-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
-}
-
-.food-card:hover {
-  box-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
-}
-
-.food-nutrient-grid {
-  grid-template-columns: repeat(2, minmax(30%, 1fr));
-  // column-gap: 40%;
-
-  @include small() {
-    grid-template-columns: repeat(1, 1fr);
-  }
-}
-
-.bg-light {
-  background: var(--bg-light);
+.p-card {
+  box-shadow: var(--p-card-shadow);
+  border-radius: var(--p-card-border-radius);
 }

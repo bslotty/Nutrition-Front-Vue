@@ -3,6 +3,7 @@ import { useDialog } from "@/modules/core/data/dialog.store";
 import TextSearch from "@/modules/core/dialogs/TextSearch.vue"
 import DateRange from "@/modules/core/dialogs/DateRange.vue";
 import WeightDetails from "@/modules/weight/dialogs/WeightDetails.vue";
+import FoodPicker from "@/modules/food/components/FoodPicker.vue";
 const $dialog = useDialog();
 
 function close(event: MouseEvent) {
@@ -20,10 +21,11 @@ function close(event: MouseEvent) {
     v-if="$dialog.target != ''"
     @mousedown="close($event)"
   >
-    <dialog class="card p-1 f-row fd-col j-start a-stretch g-5">
+    <dialog class="card p-1 f-row fd-col j-start a-stretch g-5" :class="{ 'food-picker-dialog': $dialog.target == 'foodpicker' }">
       <TextSearch v-if="$dialog.target == 'textsearch'" name=""></TextSearch>
       <DateRange v-if="$dialog.target == 'daterange'" start="" end=""></DateRange>
       <WeightDetails v-if="$dialog.target == 'weightdetails'" pounds="" date=""></WeightDetails>
+      <FoodPicker v-if="$dialog.target == 'foodpicker'"></FoodPicker>
     </dialog>
   </div>
 </template>
@@ -33,6 +35,12 @@ dialog .card {
   width: min(450px, 100vw);
   box-shadow: var(--elevation-1);
   border: none;
+
+  &.food-picker-dialog {
+    width: min(900px, 95vw);
+    max-height: 600px;
+    overflow-y: auto;
+  }
 }
 
 .dialog-backdrop {

@@ -32,16 +32,17 @@ function refresh() {
 </script>
 
 <template>
-  <div class="p-3">
+  <div class="">
     <!-- Header Row -->
     <HeaderRow class="mb-3">
       <template #title>Foods</template>
       <template #actions>
         <Button
           icon="pi pi-refresh"
-          severity="secondary"
+          severity="primary"
           outlined
           @click="refresh()"
+          aria-label="Refresh"
         />
         <Button
           label="Food"
@@ -51,7 +52,7 @@ function refresh() {
         />
         <Button
           label="Recipe"
-          icon="pi pi-th-large"
+          icon="pi pi-plus"
           severity="success"
           @click="createMulti()"
         />
