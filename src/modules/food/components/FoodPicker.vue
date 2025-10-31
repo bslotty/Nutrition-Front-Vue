@@ -3,11 +3,18 @@ import { ref, computed, onMounted } from "vue";
 import { useFoodStore } from "../data/Food.store";
 import { useDialog } from "@/modules/core/data/dialog.store";
 import { Food } from "../models/Food";
-import type { RecipeIngredient } from "../interfaces/RecipeIngredient";
+import type { BaseFood } from "../models/BaseFood";
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+
+// Type for food selection
+interface FoodSelection {
+  food: BaseFood;
+  amount: number;
+  unit: string;
+}
 
 // Composables
 const $dialog = useDialog();
@@ -17,11 +24,11 @@ const $foods = useFoodStore();
 const loading = ref(false);
 const searchTerm = ref('');
 const foods = ref<Food[]>([]);
-const selectedFoods = ref<Map<string, RecipeIngredient>>(new Map());
+const selectedFoods = ref<Map<string, FoodSelection>>(new Map());
 
 // Get config from dialog data
 const multiple = computed(() => $dialog.data?.multiple ?? true);
-const preselectedFoods = computed<RecipeIngredient[]>(() => $dialog.data?.preselectedFoods ?? []);
+const preselectedFoods = computed<FoodSelection[]>(() => $dialog.data?.preselectedFoods ?? []);
 
 // Computed properties
 const filteredFoods = computed(() => {
@@ -68,24 +75,24 @@ function initializePreselected(): void {
 
 function toggleFoodSelection(food: Food): void {
   const foodId = food.id;
-  
+
   if (selectedFoods.value.has(foodId)) {
     // Remove from selection
     selectedFoods.value.delete(foodId);
   } else {
     // Add to selection with default values
-    const ingredient: RecipeIngredient = {
+    const selection: FoodSelection = {
       food: food,
       amount: food.serving.size || 1,
       unit: food.serving.unit || 'serving'
     };
-    
+
     if (!multiple.value) {
       // Clear previous selections if single mode
       selectedFoods.value.clear();
     }
-    
-    selectedFoods.value.set(foodId, ingredient);
+
+    selectedFoods.value.set(foodId, selection);
   }
 }
 
@@ -124,8 +131,8 @@ function isSelected(food: Food): boolean {
   return selectedFoods.value.has(food.id);
 }
 
-function calculateNutrientInfo(ingredient: RecipeIngredient) {
-  const nutrients = ingredient.food.calculateNutrients(ingredient.amount, ingredient.unit);
+function calculateNutrientInfo(selection: FoodSelection) {
+  const nutrients = selection.food.calculateNutrients(selection.amount, selection.unit);
   const calories = Math.round(nutrients.protein * 4 + nutrients.carbs * 4 + nutrients.fat * 9);
   return {
     calories,

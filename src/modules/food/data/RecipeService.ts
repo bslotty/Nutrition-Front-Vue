@@ -202,9 +202,8 @@ export class RecipeService extends BaseService {
     
     // Local search fallback
     const lowerQuery = query.toLowerCase();
-    return this.list.filter(recipe => 
-      recipe.name.toLowerCase().includes(lowerQuery) ||
-      recipe.brand.toLowerCase().includes(lowerQuery)
+    return this.list.filter(recipe =>
+      recipe.name.toLowerCase().includes(lowerQuery)
     );
   }
 
@@ -212,24 +211,19 @@ export class RecipeService extends BaseService {
     return {
       id: recipe.id,
       name: recipe.name,
-      brand: recipe.brand,
-      totalYield: {
-        size: recipe.totalYield.size,
-        unit: recipe.totalYield.unit
-      },
-      
-      // Serialize ingredients - need to include full food data since Recipe.fromPayload expects it
-      ingredients: recipe.ingredients.map(ingredient => ({
+
+      // Serialize parts with full food data
+      parts: recipe.parts.map(part => ({
         food: {
-          id: ingredient.food.id,
-          name: ingredient.food.name,
-          brand: ingredient.food.brand,
-          type: ingredient.food.type,
-          serving: ingredient.food.serving,
-          nutrients: ingredient.food.nutrients
+          id: part.food.id,
+          name: part.food.name,
+          brand: part.food.brand,
+          type: part.food.type,
+          serving: part.food.serving,
+          nutrients: part.food.nutrients
         },
-        amount: ingredient.amount,
-        unit: ingredient.unit
+        amount: part.amount,
+        unit: part.unit
       }))
     };
   }

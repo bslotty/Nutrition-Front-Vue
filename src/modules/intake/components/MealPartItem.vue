@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { ref, computed } from "vue";
-import type { MealPart } from "@/modules/intake/interfaces/MealPart";
+import type { Part } from "@/modules/food/models/Part";
 import Button from 'primevue/button';
 import RecipeIngredientsList from "../components/RecipeIngredientsList.vue";
 import FoodTypeBadge from "../components/FoodTypeBadge.vue";
 
 interface Props {
-  part: MealPart;
+  part: Part;
   showExpanded?: boolean;
 }
 
@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  viewDetails: [part: MealPart];
+  viewDetails: [part: Part];
 }>();
 
 const expanded = ref(props.showExpanded);
@@ -72,7 +72,7 @@ function handleClick() {
     </div>
     
     <div v-if="isRecipe && expanded" class="recipe-details ml-5 mt-2">
-      <RecipeIngredientsList :ingredients="part.food.ingredients" :servingMultiplier="part.amount / part.food.serving.size" />
+      <RecipeIngredientsList :parts="part.food.parts" :servingMultiplier="part.amount / part.food.serving.size" />
     </div>
   </div>
 </template>

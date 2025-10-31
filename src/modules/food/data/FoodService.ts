@@ -10,7 +10,7 @@ export class FoodService extends BaseService {
     super("Foods", config);
   }
 
-  async getListFromServer(start = 0, count = 25): Promise<Food[]> {
+  async getListFromServer(start = 0, count = 100): Promise<Food[]> {
     try {
       const response = await this.getList<any>(start, count);
       const foods = response.map(payload => Food.fromPayload(payload));

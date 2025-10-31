@@ -3,7 +3,8 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useRecipeStore } from "../data/Recipe.store.ts";
 import { Recipe } from "../models/Recipe";
-import type { RecipeIngredient } from "../interfaces/RecipeIngredient";
+import { Part } from "../models/Part";
+import type { BaseFood } from "../models/BaseFood";
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
@@ -24,12 +25,9 @@ const currentRecipe = ref<Recipe | null>(null);
 
 // Form models
 const name = defineModel<string>("name", { required: true });
-const brand = defineModel<string>("brand", { required: true });
-const servingSize = defineModel<number>("servingSize", { required: true });
-const servingSizeType = defineModel<string>("servingSizeType", { required: true });
 
-// Recipe ingredients
-const ingredients = ref<RecipeIngredient[]>([]);
+// Recipe parts
+const parts = ref<Part[]>([]);
 
 // Composables
 const route = useRoute();
@@ -45,7 +43,7 @@ const isCreateMode = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return !!(name.value && brand.value && servingSize.value && servingSizeType.value);
+  return !!(name.value);
 });
 
 const pageTitle = computed(() => {
@@ -61,8 +59,8 @@ const saveButtonProps = computed(() => ({
 
 // Computed nutritional totals
 const totalNutrients = computed(() => {
-  return ingredients.value.reduce((totals, ingredient) => {
-    const nutrients = ingredient.food.calculateNutrients(ingredient.amount, ingredient.unit);
+  return parts.value.reduce((totals, part) => {
+    const nutrients = part.nutrients;
     return {
       protein: totals.protein + nutrients.protein,
       fat: totals.fat + nutrients.fat,
@@ -70,7 +68,7 @@ const totalNutrients = computed(() => {
       fiber: totals.fiber + nutrients.fiber,
       sugar: totals.sugar + nutrients.sugar,
       sodium: totals.sodium + nutrients.sodium,
-      calories: totals.calories + (nutrients.protein * 4 + nutrients.carbs * 4 + nutrients.fat * 9)
+      calories: totals.calories + part.calories
     };
   }, {
     protein: 0,
@@ -169,7 +167,7 @@ async function save() {
 function validate() {
   const regex = new RegExp("[\\w\\-\\.\\@ !#$%^+]+", "gm");
   const match = (name.value as string)?.match(regex);
-  valid.value = match !== null && !!name.value && !!brand.value;
+  valid.value = match !== null && !!name.value;
 }
 
 async function remove() {
@@ -217,28 +215,20 @@ async function remove() {
 
 function createRecipeFromForm(): Recipe {
   const baseId = isCreateMode.value ? 'create' : currentRecipe.value?.id || 'create';
-  
+
   return new Recipe(baseId)
     .setName(name.value || '')
-    .setBrand(brand.value || '')
-    .setServing(servingSize.value || 0, servingSizeType.value || '')
-    .setIngredients(ingredients.value);
+    .setParts(parts.value);
 }
 
 function setFormValues(r: Recipe) {
   name.value = r.name;
-  brand.value = r.brand;
-  servingSize.value = r.serving.size;
-  servingSizeType.value = r.serving.unit;
-  ingredients.value = r.ingredients || [];
+  parts.value = r.parts || [];
 }
 
 function initializeEmptyForm() {
   name.value = '';
-  brand.value = '';
-  servingSize.value = 0;
-  servingSizeType.value = '';
-  ingredients.value = [];
+  parts.value = [];
 }
 
 function handleInput() {
@@ -248,53 +238,59 @@ function handleInput() {
 function openFoodPicker() {
   $dialog.setData({
     multiple: true,
-    preselectedFoods: ingredients.value,
-    onClose: (selectedFoods: RecipeIngredient[]) => {
-      selectedFoods.forEach(ingredient => {
-        const existingIndex = ingredients.value.findIndex(
-          existing => existing.food.id === ingredient.food.id
+    preselectedFoods: parts.value.map(part => ({
+      food: part.food,
+      amount: part.amount,
+      unit: part.unit
+    })),
+    onClose: (selectedFoods: Array<{ food: BaseFood, amount: number, unit: string }>) => {
+      selectedFoods.forEach(item => {
+        const existingIndex = parts.value.findIndex(
+          existing => existing.food.id === item.food.id
         );
 
         if (existingIndex >= 0) {
-          // Update existing ingredient
-          ingredients.value[existingIndex] = ingredient;
+          // Update existing part
+          parts.value[existingIndex].setAmount(item.amount, item.unit);
         } else {
-          // Add new ingredient
-          ingredients.value.push(ingredient);
+          // Add new part
+          const part = new Part(
+            `part_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            item.food,
+            item.amount,
+            item.unit
+          );
+          parts.value.push(part);
         }
       });
 
-      validate(); // Revalidate form after adding ingredients
+      validate(); // Revalidate form after adding parts
     }
   });
   $dialog.open('foodpicker');
 }
 
-function removeIngredient(ingredient: RecipeIngredient) {
+function removePart(part: Part) {
   confirm.require({
-    message: `Remove ${ingredient.food.name} from recipe?`,
+    message: `Remove ${part.food.name} from recipe?`,
     header: 'Confirm Removal',
     icon: 'pi pi-question-circle',
     rejectClass: 'p-button-secondary p-button-outlined',
     acceptClass: 'p-button-danger',
     accept: () => {
-      const index = ingredients.value.findIndex(
-        item => item.food.id === ingredient.food.id
-      );
+      const index = parts.value.findIndex(p => p.id === part.id);
       if (index >= 0) {
-        ingredients.value.splice(index, 1);
+        parts.value.splice(index, 1);
         validate();
       }
     }
   });
 }
 
-function updateIngredientAmount(ingredient: RecipeIngredient, newAmount: number) {
-  const index = ingredients.value.findIndex(
-    item => item.food.id === ingredient.food.id
-  );
+function updatePartAmount(part: Part, newAmount: number) {
+  const index = parts.value.findIndex(p => p.id === part.id);
   if (index >= 0) {
-    ingredients.value[index].amount = newAmount;
+    parts.value[index].setAmount(newAmount);
   }
 }
 </script>
@@ -330,18 +326,7 @@ function updateIngredientAmount(ingredient: RecipeIngredient, newAmount: number)
         <div class="recipe-grid">
           <!-- Basic Information Section -->
           <div class="flex flex-column gap-4">
-            <h4 class="text-primary m-0 mb-2">Basic Information</h4>
-            
-            <div class="field">
-              <label for="brand" class="block text-900 font-medium mb-2">Brand</label>
-              <InputText
-                id="brand"
-                v-model="brand"
-                placeholder="Enter brand name"
-                class="w-full"
-                @input="handleInput"
-              />
-            </div>
+            <h4 class="text-primary m-0 mb-2">Recipe Information</h4>
 
             <div class="field">
               <label for="name" class="block text-900 font-medium mb-2">Recipe Name</label>
@@ -352,31 +337,6 @@ function updateIngredientAmount(ingredient: RecipeIngredient, newAmount: number)
                 class="w-full"
                 @input="handleInput"
               />
-            </div>
-
-            <div class="flex gap-3">
-              <div class="field flex-1">
-                <label for="servingSize" class="block text-900 font-medium mb-2">Total Yield</label>
-                <InputNumber
-                  id="servingSize"
-                  v-model="servingSize"
-                  placeholder="0"
-                  class="w-full"
-                  :min="0"
-                  :maxFractionDigits="2"
-                  @input="handleInput"
-                />
-              </div>
-              <div class="field" style="min-width: 120px;">
-                <label for="servingType" class="block text-900 font-medium mb-2">Unit</label>
-                <InputText
-                  id="servingType"
-                  v-model="servingSizeType"
-                  placeholder="servings, cups"
-                  class="w-full"
-                  @input="handleInput"
-                />
-              </div>
             </div>
           </div>
 
@@ -457,14 +417,14 @@ function updateIngredientAmount(ingredient: RecipeIngredient, newAmount: number)
             </Button>
           </div>
 
-          <div v-if="ingredients.length === 0" class="text-center p-4 bg-gray-50 border-round">
+          <div v-if="parts.length === 0" class="text-center p-4 bg-gray-50 border-round">
             <i class="pi pi-info-circle text-2xl text-gray-400 mb-2"></i>
             <p class="text-gray-600 m-0">No ingredients added yet. Click "Add Ingredient" to get started.</p>
           </div>
 
-          <DataTable 
-            v-else 
-            :value="ingredients" 
+          <DataTable
+            v-else
+            :value="parts"
             class="ingredients-table"
             :paginator="false"
             responsive-layout="scroll"
@@ -482,7 +442,7 @@ function updateIngredientAmount(ingredient: RecipeIngredient, newAmount: number)
               <template #body="{ data }">
                 <InputNumber
                   :model-value="data.amount"
-                  @update:model-value="updateIngredientAmount(data, $event)"
+                  @update:model-value="updatePartAmount(data, $event)"
                   :min="0"
                   :max-fraction-digits="2"
                   size="small"
@@ -490,28 +450,26 @@ function updateIngredientAmount(ingredient: RecipeIngredient, newAmount: number)
                 />
               </template>
             </Column>
-            
+
             <Column field="unit" header="Unit" style="min-width: 100px;">
               <template #body="{ data }">
                 <span>{{ data.unit }}</span>
               </template>
             </Column>
-            
+
             <Column header="Calories" style="min-width: 100px;">
               <template #body="{ data }">
-                <span>{{ Math.round(data.food.calculateNutrients(data.amount, data.unit).protein * 4 + 
-                         data.food.calculateNutrients(data.amount, data.unit).carbs * 4 + 
-                         data.food.calculateNutrients(data.amount, data.unit).fat * 9) }}</span>
+                <span>{{ data.calories }}</span>
               </template>
             </Column>
-            
+
             <Column header="Actions" style="min-width: 80px;">
               <template #body="{ data }">
                 <Button
                   severity="danger"
                   outlined
                   size="small"
-                  @click="removeIngredient(data)"
+                  @click="removePart(data)"
                   aria-label="Remove ingredient"
                 >
                   <i class="material-symbols-outlined">delete</i>

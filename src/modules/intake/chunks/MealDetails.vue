@@ -3,9 +3,8 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useMealStore } from "../data/Meal.store";
 import { Meal } from "../models/Meal";
-import { MealEntry } from "../models/MealEntry";
+import { Part } from "@/modules/food/models/Part";
 import type { BaseFood } from "@/modules/food/models/BaseFood";
-import type { RecipeIngredient } from "@/modules/food/interfaces/RecipeIngredient";
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
@@ -29,7 +28,7 @@ const currentMeal = ref<Meal | null>(null);
 // Form models
 const name = ref<string>('');
 const date = ref<Date>(new Date());
-const entries = ref<MealEntry[]>([]);
+const parts = ref<Part[]>([]);
 
 // Composables
 const route = useRoute();
@@ -45,7 +44,7 @@ const isCreateMode = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return !!(name.value && date.value && entries.value.length > 0);
+  return !!(name.value && date.value && parts.value.length > 0);
 });
 
 const pageTitle = computed(() => {
@@ -54,8 +53,8 @@ const pageTitle = computed(() => {
 
 // Computed nutritional totals
 const totalNutrients = computed(() => {
-  return entries.value.reduce((totals, entry) => {
-    const nutrients = entry.nutrients;
+  return parts.value.reduce((totals, part) => {
+    const nutrients = part.nutrients;
     return {
       protein: totals.protein + nutrients.protein,
       fat: totals.fat + nutrients.fat,
@@ -63,7 +62,7 @@ const totalNutrients = computed(() => {
       fiber: totals.fiber + nutrients.fiber,
       sugar: totals.sugar + nutrients.sugar,
       sodium: totals.sodium + nutrients.sodium,
-      calories: totals.calories + entry.calories
+      calories: totals.calories + part.calories
     };
   }, {
     protein: 0,
@@ -196,9 +195,9 @@ function createMealFromForm(): Meal {
   const meal = new Meal(mealId, date.value);
   meal.setName(name.value);
 
-  // Add entries
-  entries.value.forEach(entry => {
-    meal.addEntry(entry.food, entry.amount, entry.unit);
+  // Add parts
+  parts.value.forEach(part => {
+    meal.addPart(part.food, part.amount, part.unit);
   });
 
   return meal;
@@ -207,30 +206,30 @@ function createMealFromForm(): Meal {
 function setFormValues(meal: Meal) {
   name.value = meal.name;
   date.value = new Date(meal.date);
-  entries.value = [...meal.entries];
+  parts.value = [...meal.parts];
 }
 
 function initializeEmptyForm() {
   name.value = '';
   date.value = new Date();
-  entries.value = [];
+  parts.value = [];
 }
 
 function openFoodPicker() {
   $dialog.setData({
     multiple: true,
-    preselectedFoods: entries.value.map(entry => ({
-      food: entry.food,
-      amount: entry.amount,
-      unit: entry.unit
+    preselectedFoods: parts.value.map(part => ({
+      food: part.food,
+      amount: part.amount,
+      unit: part.unit
     })),
-    onClose: (selectedFoods: RecipeIngredient[]) => {
-      entries.value = selectedFoods.map(ingredient => {
-        return new MealEntry(
-          `entry_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          ingredient.food,
-          ingredient.amount,
-          ingredient.unit
+    onClose: (selectedFoods: Array<{ food: BaseFood, amount: number, unit: string }>) => {
+      parts.value = selectedFoods.map(item => {
+        return new Part(
+          `part_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          item.food,
+          item.amount,
+          item.unit
         );
       });
     }
@@ -238,26 +237,26 @@ function openFoodPicker() {
   $dialog.open('foodpicker');
 }
 
-function removeEntry(entry: MealEntry) {
+function removePart(part: Part) {
   confirm.require({
-    message: `Remove ${entry.food.name} from meal?`,
+    message: `Remove ${part.food.name} from meal?`,
     header: 'Confirm Removal',
     icon: 'pi pi-question-circle',
     rejectClass: 'p-button-secondary p-button-outlined',
     acceptClass: 'p-button-danger',
     accept: () => {
-      const index = entries.value.findIndex(e => e.id === entry.id);
+      const index = parts.value.findIndex(p => p.id === part.id);
       if (index >= 0) {
-        entries.value.splice(index, 1);
+        parts.value.splice(index, 1);
       }
     }
   });
 }
 
-function updateEntryAmount(entry: MealEntry, newAmount: number) {
-  const index = entries.value.findIndex(e => e.id === entry.id);
+function updatePartAmount(part: Part, newAmount: number) {
+  const index = parts.value.findIndex(p => p.id === part.id);
   if (index >= 0) {
-    entries.value[index].setAmount(newAmount);
+    parts.value[index].setAmount(newAmount);
   }
 }
 </script>
@@ -392,14 +391,14 @@ function updateEntryAmount(entry: MealEntry, newAmount: number) {
             />
           </div>
 
-          <div v-if="entries.length === 0" class="text-center p-4 bg-gray-50 border-round">
+          <div v-if="parts.length === 0" class="text-center p-4 bg-gray-50 border-round">
             <i class="pi pi-info-circle text-2xl text-gray-400 mb-2"></i>
             <p class="text-gray-600 m-0">No food items added yet. Click "Add Food" to get started.</p>
           </div>
 
           <DataTable
             v-else
-            :value="entries"
+            :value="parts"
             class="food-items-table"
             :paginator="false"
             responsive-layout="scroll"
@@ -417,7 +416,7 @@ function updateEntryAmount(entry: MealEntry, newAmount: number) {
               <template #body="{ data }">
                 <InputNumber
                   :model-value="data.amount"
-                  @update:model-value="updateEntryAmount(data, $event)"
+                  @update:model-value="updatePartAmount(data, $event)"
                   :min="0"
                   :max-fraction-digits="2"
                   size="small"
@@ -445,7 +444,7 @@ function updateEntryAmount(entry: MealEntry, newAmount: number) {
                   severity="danger"
                   outlined
                   size="small"
-                  @click="removeEntry(data)"
+                  @click="removePart(data)"
                   aria-label="Remove food item"
                 />
               </template>

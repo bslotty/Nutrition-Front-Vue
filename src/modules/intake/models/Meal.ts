@@ -1,30 +1,26 @@
 import type { NutrientProfile } from "@/modules/food/interfaces/NutrientProfile";
 import { BaseFood } from "@/modules/food/models/BaseFood";
-import { MealEntry } from "./MealEntry";
+import { Part } from "@/modules/food/models/Part";
 
 export class Meal {
   public readonly id: string;
   public name: string = '';
   public date: Date;
-  private _entries: MealEntry[] = [];
+  public parts: Part[] = [];
 
   constructor(id: string, date: Date = new Date()) {
     this.id = id;
     this.date = date;
   }
 
-  get entries(): MealEntry[] { 
-    return [...this._entries]; 
-  }
-
   get totals(): NutrientProfile {
     const totals = this.createEmptyNutrients();
-    
-    this._entries.forEach(entry => {
-      const entryNutrients = entry.nutrients;
-      Object.keys(entryNutrients).forEach(key => {
-        totals[key as keyof NutrientProfile] += 
-          entryNutrients[key as keyof NutrientProfile];
+
+    this.parts.forEach(part => {
+      const partNutrients = part.nutrients;
+      Object.keys(partNutrients).forEach(key => {
+        totals[key as keyof NutrientProfile] +=
+          partNutrients[key as keyof NutrientProfile];
       });
     });
 
@@ -32,20 +28,29 @@ export class Meal {
   }
 
   get totalCalories(): number {
-    return this._entries.reduce((sum, entry) => sum + entry.calories, 0);
+    return this.parts.reduce((sum, part) => sum + part.calories, 0);
+  }
+
+  toPayload(): any {
+    return {
+      id: this.id,
+      name: this.name,
+      date: this.date,
+      parts: this.parts.map(part => part.toPayload())
+    };
   }
 
   static fromPayload(payload: any): Meal {
     const meal = new Meal(payload.id, new Date(payload.date));
     meal.name = payload.name || '';
-    
-    if (payload.entries) {
-      payload.entries.forEach((entryPayload: any) => {
-        const entry = MealEntry.fromPayload(entryPayload);
-        meal._entries.push(entry);
+
+    if (payload.parts) {
+      payload.parts.forEach((partPayload: any) => {
+        const part = Part.fromPayload(partPayload);
+        meal.parts.push(part);
       });
     }
-    
+
     return meal;
   }
 
@@ -59,26 +64,26 @@ export class Meal {
     return this;
   }
 
-  addEntry(food: BaseFood, amount: number, unit: string): MealEntry {
-    const entry = new MealEntry(
-      `entry_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+  addPart(food: BaseFood, amount: number, unit: string): Part {
+    const part = new Part(
+      `part_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       food,
       amount,
       unit
     );
-    this._entries.push(entry);
-    return entry;
+    this.parts.push(part);
+    return part;
   }
 
-  removeEntry(entryId: string): this {
-    this._entries = this._entries.filter(entry => entry.id !== entryId);
+  removePart(partId: string): this {
+    this.parts = this.parts.filter(part => part.id !== partId);
     return this;
   }
 
-  updateEntry(entryId: string, amount: number, unit?: string): this {
-    const entry = this._entries.find(e => e.id === entryId);
-    if (entry) {
-      entry.setAmount(amount, unit);
+  updatePart(partId: string, amount: number, unit?: string): this {
+    const part = this.parts.find(p => p.id === partId);
+    if (part) {
+      part.setAmount(amount, unit);
     }
     return this;
   }

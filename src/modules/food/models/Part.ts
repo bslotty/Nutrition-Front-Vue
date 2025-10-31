@@ -1,9 +1,9 @@
-import type { NutrientProfile } from "@/modules/food/interfaces/NutrientProfile";
-import { BaseFood } from "@/modules/food/models/BaseFood";
-import { Food } from "@/modules/food/models/Food";
-import { Recipe } from "@/modules/food/models/Recipe";
+import type { NutrientProfile } from "../interfaces/NutrientProfile";
+import { BaseFood } from "./BaseFood";
+import { Food } from "./Food";
+import { Recipe } from "./Recipe";
 
-export class MealEntry {
+export class Part {
   public readonly id: string;
   public readonly food: BaseFood;
   public amount: number;
@@ -31,12 +31,21 @@ export class MealEntry {
     return this;
   }
 
-  static fromPayload(payload: any): MealEntry {
-    const food = payload.food.type === 'simple' 
+  toPayload(): any {
+    return {
+      id: this.id,
+      food: this.food,
+      amount: this.amount,
+      unit: this.unit
+    };
+  }
+
+  static fromPayload(payload: any): Part {
+    const food = payload.food.type === 'simple'
       ? Food.fromPayload(payload.food)
       : Recipe.fromPayload(payload.food);
-    
-    return new MealEntry(
+
+    return new Part(
       payload.id,
       food,
       payload.amount,
