@@ -20,6 +20,8 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from '@/modules/core/data/dialog.store';
 import HeaderRow from '@/modules/core/components/HeaderRow.vue';
 import FormInput from '@/modules/core/components/FormInput.vue';
+import NutrientSummary from '@/modules/core/components/NutrientSummary.vue';
+import NutrientTotals from '@/modules/core/components/NutrientTotals.vue';
 
 // Reactive state
 const loading = ref(false);
@@ -86,7 +88,6 @@ onMounted(async () => {
       currentMeal.value = meal;
       setFormValues(meal);
     } catch (error) {
-      console.error('Failed to load meal:', error);
       toast.add({
         severity: 'error',
         summary: 'Error',
@@ -138,7 +139,6 @@ async function save() {
 
     router.push({ name: 'intake-list' });
   } catch (error) {
-    console.error('Failed to save meal:', error);
     toast.add({
       severity: 'error',
       summary: 'Error',
@@ -176,7 +176,6 @@ function remove() {
 
         router.push({ name: 'intake-list' });
       } catch (error) {
-        console.error('Failed to delete meal:', error);
         toast.add({
           severity: 'error',
           summary: 'Error',
@@ -237,6 +236,28 @@ function openFoodPicker() {
   $dialog.open('foodpicker');
 }
 
+function openRecipePicker() {
+  $dialog.setData({
+    multiple: true,
+    preselectedFoods: parts.value.map(part => ({
+      food: part.food,
+      amount: part.amount,
+      unit: part.unit
+    })),
+    onClose: (selectedRecipes: Array<{ food: BaseFood, amount: number, unit: string }>) => {
+      parts.value = selectedRecipes.map(item => {
+        return new Part(
+          `part_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          item.food,
+          item.amount,
+          item.unit
+        );
+      });
+    }
+  });
+  $dialog.open('recipepicker');
+}
+
 function removePart(part: Part) {
   confirm.require({
     message: `Remove ${part.food.name} from meal?`,
@@ -263,196 +284,97 @@ function updatePartAmount(part: Part, newAmount: number) {
 
 <template>
   <div>
-    <Card class="meal-details-card">
-      <template #header>
-        <div class="flex justify-content-between align-items-center my-3">
-          <h3 class="m-0">{{ pageTitle }}</h3>
+    <div>
+      <div class="flex justify-between items-center px-3 py-3">
+        <h3 class="m-0">{{ pageTitle }}</h3>
+        <div class="flex gap-2">
+          <Button v-if="!isCreateMode" icon="pi pi-trash" severity="danger" outlined @click="remove()"
+            :disabled="loading" aria-label="Delete meal" />
+          <Button label="Save" icon="pi pi-check" severity="success" @click="save()" :disabled="!isFormValid || loading"
+            :loading="loading" :aria-label="isCreateMode ? 'Create meal' : 'Save meal'" />
+        </div>
+      </div>
+
+      <div class="meal-grid">
+        <!-- Column 1: Meal Info -->
+        <div class="flex flex-col">
+          <h4 class="text-primary m-0 mb-2">Meal Information</h4>
+
+          <FormInput label="Meal Name" required>
+            <template #input>
+              <InputText v-model="name" placeholder="Enter meal name (e.g., Breakfast, Lunch)" class="w-full" />
+            </template>
+          </FormInput>
+
+          <FormInput label="Date" required>
+            <template #input>
+              <DatePicker v-model="date" dateFormat="yy-mm-dd" showIcon class="w-full" />
+            </template>
+          </FormInput>
+        </div>
+
+        <!-- Column 2: Nutritional Summary -->
+        <div class="flex flex-col">
+          <h4 class="text-primary m-0 mb-2">Nutritional Summary</h4>
+          <NutrientTotals :nutrients="totalNutrients" />
+        </div>
+      </div>
+
+      <Divider />
+
+      <!-- Food Items Section -->
+      <div class="food-items-section">
+        <div class="flex justify-between items-center mb-4">
+          <h4 class="text-primary m-0">Food Items</h4>
           <div class="flex gap-2">
-            <Button
-              v-if="!isCreateMode"
-              icon="pi pi-trash"
-              severity="danger"
-              outlined
-              @click="remove()"
-              :disabled="loading"
-              aria-label="Delete meal"
-            />
-            <Button
-              label="Save"
-              icon="pi pi-check"
-              severity="success"
-              @click="save()"
-              :disabled="!isFormValid || loading"
-              :loading="loading"
-              :aria-label="isCreateMode ? 'Create meal' : 'Save meal'"
-            />
-          </div>
-        </div>
-      </template>
-
-      <template #content>
-        <div class="meal-grid">
-          <!-- Column 1: Meal Info -->
-          <div class="flex flex-column gap-4">
-            <h4 class="text-primary m-0 mb-2">Meal Information</h4>
-
-            <FormInput label="Meal Name" required>
-              <template #input>
-                <InputText
-                  v-model="name"
-                  placeholder="Enter meal name (e.g., Breakfast, Lunch)"
-                  class="w-full"
-                />
-              </template>
-            </FormInput>
-
-            <FormInput label="Date" required>
-              <template #input>
-                <DatePicker
-                  v-model="date"
-                  dateFormat="yy-mm-dd"
-                  showIcon
-                  class="w-full"
-                />
-              </template>
-            </FormInput>
-          </div>
-
-          <!-- Column 2: Nutritional Summary -->
-          <div class="flex flex-column gap-4">
-            <h4 class="text-primary m-0 mb-2">Nutritional Summary</h4>
-
-            <!-- Calories -->
-            <div class="field">
-              <label class="block text-900 font-medium mb-2">Total Calories</label>
-              <div class="p-3 bg-primary-50 border-round text-center">
-                <span class="text-2xl font-bold text-primary">{{ Math.round(totalNutrients.calories) }}</span>
-                <span class="text-sm ml-2">calories</span>
-              </div>
-            </div>
-
-            <!-- Macronutrients Summary -->
-            <div class="flex gap-3">
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #4CAF50;">
-                  <i class="pi pi-circle-fill mr-1"></i>Protein
-                </label>
-                <div class="p-2 bg-green-50 border-round">
-                  <div class="text-lg font-semibold">{{ totalNutrients.protein.toFixed(1) }}g</div>
-                </div>
-              </div>
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #2196F3;">
-                  <i class="pi pi-circle-fill mr-1"></i>Fat
-                </label>
-                <div class="p-2 bg-blue-50 border-round">
-                  <div class="text-lg font-semibold">{{ totalNutrients.fat.toFixed(1) }}g</div>
-                </div>
-              </div>
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #FFA000;">
-                  <i class="pi pi-circle-fill mr-1"></i>Carbs
-                </label>
-                <div class="p-2 bg-orange-50 border-round">
-                  <div class="text-lg font-semibold">{{ totalNutrients.carbs.toFixed(1) }}g</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Micronutrients Summary -->
-            <div class="flex gap-3">
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #9C27B0;">Fiber</label>
-                <div class="text-base">{{ totalNutrients.fiber.toFixed(1) }}g</div>
-              </div>
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #F44336;">Sugar</label>
-                <div class="text-base">{{ totalNutrients.sugar.toFixed(1) }}g</div>
-              </div>
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #795548;">Sodium</label>
-                <div class="text-base">{{ totalNutrients.sodium.toFixed(0) }}mg</div>
-              </div>
-            </div>
+            <Button label="Add Food" icon="pi pi-plus" severity="success" @click="openFoodPicker()" />
+            <Button label="Add Recipe" icon="pi pi-plus" severity="primary" @click="openRecipePicker()" />
           </div>
         </div>
 
-        <Divider />
-
-        <!-- Food Items Section -->
-        <div class="food-items-section">
-          <div class="flex justify-content-between align-items-center mb-4">
-            <h4 class="text-primary m-0">Food Items</h4>
-            <Button
-              label="Add Food"
-              icon="pi pi-plus"
-              severity="success"
-              @click="openFoodPicker()"
-            />
-          </div>
-
-          <div v-if="parts.length === 0" class="text-center p-4 bg-gray-50 border-round">
-            <i class="pi pi-info-circle text-2xl text-gray-400 mb-2"></i>
-            <p class="text-gray-600 m-0">No food items added yet. Click "Add Food" to get started.</p>
-          </div>
-
-          <DataTable
-            v-else
-            :value="parts"
-            class="food-items-table"
-            :paginator="false"
-            responsive-layout="scroll"
-          >
-            <Column field="food.name" header="Food Name" :sortable="true" style="min-width: 300px;">
-              <template #body="{ data }">
-                <div class="flex flex-column">
-                  <span class="font-medium">{{ data.food.name }}</span>
-                  <span class="text-sm text-gray-500">{{ data.food.brand }}</span>
-                </div>
-              </template>
-            </Column>
-
-            <Column header="Amount" style="width: 100px;">
-              <template #body="{ data }">
-                <InputNumber
-                  :model-value="data.amount"
-                  @update:model-value="updatePartAmount(data, $event)"
-                  :min="0"
-                  :max-fraction-digits="2"
-                  size="small"
-                  style="width: 80px;"
-                />
-              </template>
-            </Column>
-
-            <Column field="unit" header="Unit" style="min-width: 100px;">
-              <template #body="{ data }">
-                <span>{{ data.unit }}</span>
-              </template>
-            </Column>
-
-            <Column header="Calories" style="min-width: 100px;">
-              <template #body="{ data }">
-                <span>{{ data.calories }}</span>
-              </template>
-            </Column>
-
-            <Column header="Actions" style="min-width: 80px;">
-              <template #body="{ data }">
-                <Button
-                  icon="pi pi-trash"
-                  severity="danger"
-                  outlined
-                  size="small"
-                  @click="removePart(data)"
-                  aria-label="Remove food item"
-                />
-              </template>
-            </Column>
-          </DataTable>
+        <div v-if="parts.length === 0" class="text-center px-4 py-4 bg-gray-50 rounded">
+          <i class="pi pi-info-circle text-2xl text-gray-400 mb-2"></i>
+          <p class="text-gray-600 m-0">No food items added yet. Click "Add Food" or "Add Recipe" to get started.</p>
         </div>
-      </template>
-    </Card>
+
+        <DataTable v-else :value="parts" class="food-items-table" :paginator="false" responsive-layout="scroll">
+          <Column field="food.name" header="Food Name" :sortable="true" style="min-width: 300px;">
+            <template #body="{ data }">
+              <div class="flex flex-col">
+                <span class="font-medium">{{ data.food.name }}</span>
+                <span class="text-sm text-gray-500">{{ data.food.brand }}</span>
+              </div>
+            </template>
+          </Column>
+
+          <Column header="Amount" style="width: 100px;">
+            <template #body="{ data }">
+              <InputNumber :model-value="data.amount" @update:model-value="updatePartAmount(data, $event)" :min="0"
+                :max-fraction-digits="2" size="small" style="width: 80px;" />
+            </template>
+          </Column>
+
+          <Column field="unit" header="Unit" style="min-width: 100px;">
+            <template #body="{ data }">
+              <span>{{ data.unit }}</span>
+            </template>
+          </Column>
+
+          <Column header="Nutrition" style="min-width: 350px;">
+            <template #body="{ data }">
+              <NutrientSummary :nutrients="data.nutrients" :showCalories="true" size="small" />
+            </template>
+          </Column>
+
+          <Column header="Actions" style="min-width: 80px;">
+            <template #body="{ data }">
+              <Button icon="pi pi-trash" severity="danger" outlined size="small" @click="removePart(data)"
+                aria-label="Remove food item" />
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+    </div>
 
     <!-- Toast notifications -->
     <Toast />

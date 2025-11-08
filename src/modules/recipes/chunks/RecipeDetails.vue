@@ -3,8 +3,8 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useRecipeStore } from "../data/Recipe.store.ts";
 import { Recipe } from "../models/Recipe";
-import { Part } from "../models/Part";
-import type { BaseFood } from "../models/BaseFood";
+import { Part } from "@/modules/food/models/Part";
+import type { BaseFood } from "@/modules/food/models/BaseFood";
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
@@ -17,6 +17,7 @@ import Column from 'primevue/column';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from '@/modules/core/data/dialog.store';
+import NutrientTotals from '@/modules/core/components/NutrientTotals.vue';
 
 // Reactive state
 const valid = ref(false);
@@ -59,8 +60,9 @@ const saveButtonProps = computed(() => ({
 
 // Computed nutritional totals
 const totalNutrients = computed(() => {
-  return parts.value.reduce((totals, part) => {
+  const totals = parts.value.reduce((totals, part) => {
     const nutrients = part.nutrients;
+
     return {
       protein: totals.protein + nutrients.protein,
       fat: totals.fat + nutrients.fat,
@@ -79,21 +81,21 @@ const totalNutrients = computed(() => {
     sodium: 0,
     calories: 0
   });
+
+  return totals;
 });
 
 // Load recipe data on mount
 onMounted(async () => {
   const routeId = route.params.id as string;
-  
+
   if (routeId !== 'create') {
     try {
       loading.value = true;
       const recipe = await $recipes.recipe$.getByID(routeId);
-      console.log("RecipeByID: ", recipe);
       currentRecipe.value = recipe;
       setFormValues(recipe);
     } catch (error) {
-      console.error('Failed to load recipe:', error);
       toast.add({
         severity: 'error',
         summary: 'Error',
@@ -152,7 +154,6 @@ async function save() {
     router.push({ name: 'recipe-list' });
 
   } catch (error) {
-    console.error('Failed to save recipe:', error);
     toast.add({
       severity: 'error',
       summary: 'Error',
@@ -186,17 +187,16 @@ async function remove() {
       try {
         loading.value = true;
         await $recipes.recipe$.deleteRecipe(currentRecipe.value!);
-        
+
         toast.add({
           severity: 'success',
           summary: 'Success',
           detail: 'Recipe deleted successfully',
           life: 3000
         });
-        
+
         router.push({ name: 'recipe-list' });
       } catch (error) {
-        console.error('Failed to delete recipe:', error);
         toast.add({
           severity: 'error',
           summary: 'Error',
@@ -289,201 +289,108 @@ function removePart(part: Part) {
 
 function updatePartAmount(part: Part, newAmount: number) {
   const index = parts.value.findIndex(p => p.id === part.id);
+
   if (index >= 0) {
-    parts.value[index].setAmount(newAmount);
+    // Update the part and create a new array to trigger reactivity
+    const updatedPart = parts.value[index].setAmount(newAmount);
+    parts.value = [...parts.value]; // Force reactivity by creating new array
   }
 }
 </script>
 
 <template>
   <div>
-    <Card class="recipe-details-card">
-      <template #header>
-        <div class="flex justify-content-between align-items-center p-3">
-          <h3 class="m-0">{{ pageTitle }}</h3>
-          <div class="flex gap-2">
-            <Button
-              :icon="isCreateMode ? 'pi pi-times' : 'pi pi-trash'"
-              :severity="isCreateMode ? 'secondary' : 'danger'"
-              outlined
-              @click="remove()"
-              class="p-button-sm"
-              :aria-label="isCreateMode ? 'Cancel' : 'Delete recipe'"
-              :disabled="loading"
-            />
-            <Button
-              icon="pi pi-check"
-              v-bind="saveButtonProps"
-              @click="save()"
-              class="p-button-sm"
-              :aria-label="isCreateMode ? 'Create recipe' : 'Save recipe'"
-            />
-          </div>
+    <div>
+      <div class="flex justify-between items-center px-3 py-3">
+        <h3 class="m-0">{{ pageTitle }}</h3>
+        <div class="flex gap-2">
+          <Button :icon="isCreateMode ? 'pi pi-times' : 'pi pi-trash'" :severity="isCreateMode ? 'secondary' : 'danger'"
+            outlined @click="remove()" class="p-button-sm" :aria-label="isCreateMode ? 'Cancel' : 'Delete recipe'"
+            :disabled="loading" />
+          <Button icon="pi pi-check" v-bind="saveButtonProps" @click="save()" class="p-button-sm"
+            :aria-label="isCreateMode ? 'Create recipe' : 'Save recipe'" />
         </div>
-      </template>
+      </div>
 
-      <template #content>
-        <div class="recipe-grid">
-          <!-- Basic Information Section -->
-          <div class="flex flex-column gap-4">
-            <h4 class="text-primary m-0 mb-2">Recipe Information</h4>
+      <div class="recipe-grid">
+        <!-- Basic Information Section -->
+        <div class="flex flex-col">
+          <h4 class="m-0 mb-2">Recipe Information</h4>
 
-            <div class="field">
-              <label for="name" class="block text-900 font-medium mb-2">Recipe Name</label>
-              <InputText
-                id="name"
-                v-model="name"
-                placeholder="Enter recipe name"
-                class="w-full"
-                @input="handleInput"
-              />
-            </div>
-          </div>
-
-          <!-- Nutritional Summary Section -->
-          <div class="flex flex-column gap-4">
-            <h4 class="text-primary m-0 mb-2">Nutritional Summary</h4>
-            
-            <!-- Calories -->
-            <div class="field">
-              <label class="block text-900 font-medium mb-2">Total Calories</label>
-              <div class="p-3 bg-primary-50 border-round text-center">
-                <span class="text-2xl font-bold text-primary">{{ Math.round(totalNutrients.calories) }}</span>
-                <span class="text-sm ml-2">calories</span>
-              </div>
-            </div>
-            
-            <!-- Macronutrients Summary -->
-            <div class="flex gap-3">
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #4CAF50;">
-                  <i class="pi pi-circle-fill mr-1"></i>Protein
-                </label>
-                <div class="p-2 bg-green-50 border-round">
-                  <div class="text-lg font-semibold">{{ totalNutrients.protein.toFixed(1) }}g</div>
-                </div>
-              </div>
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #2196F3;">
-                  <i class="pi pi-circle-fill mr-1"></i>Fat
-                </label>
-                <div class="p-2 bg-blue-50 border-round">
-                  <div class="text-lg font-semibold">{{ totalNutrients.fat.toFixed(1) }}g</div>
-                </div>
-              </div>
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #FFA000;">
-                  <i class="pi pi-circle-fill mr-1"></i>Carbs
-                </label>
-                <div class="p-2 bg-orange-50 border-round">
-                  <div class="text-lg font-semibold">{{ totalNutrients.carbs.toFixed(1) }}g</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Micronutrients Summary -->
-            <div class="flex gap-3">
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #9C27B0;">Fiber</label>
-                <div class="text-base">{{ totalNutrients.fiber.toFixed(1) }}g</div>
-              </div>
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #F44336;">Sugar</label>
-                <div class="text-base">{{ totalNutrients.sugar.toFixed(1) }}g</div>
-              </div>
-              <div class="field flex-1 text-center">
-                <label class="block font-medium mb-2" style="color: #795548;">Sodium</label>
-                <div class="text-base">{{ totalNutrients.sodium.toFixed(0) }}mg</div>
-              </div>
-            </div>
+          <div class="field">
+            <label for="name" class="block font-medium mb-2">Recipe Name</label>
+            <InputText id="name" v-model="name" placeholder="Enter recipe name" class="w-full" @input="handleInput" />
           </div>
         </div>
 
-        <Divider />
-
-        <!-- Ingredients Section -->
-        <div class="ingredients-section">
-          <div class="flex justify-content-between align-items-center mb-4">
-            <h4 class="text-primary m-0">Ingredients</h4>
-            <Button
-              label="Add Ingredient"
-              severity="success"
-              outlined
-              @click="openFoodPicker()"
-            >
-              <template #icon>
-                <i class="material-symbols-outlined">add</i>
-              </template>
-            </Button>
-          </div>
-
-          <div v-if="parts.length === 0" class="text-center p-4 bg-gray-50 border-round">
-            <i class="pi pi-info-circle text-2xl text-gray-400 mb-2"></i>
-            <p class="text-gray-600 m-0">No ingredients added yet. Click "Add Ingredient" to get started.</p>
-          </div>
-
-          <DataTable
-            v-else
-            :value="parts"
-            class="ingredients-table"
-            :paginator="false"
-            responsive-layout="scroll"
-          >
-            <Column field="food.name" header="Food Name" :sortable="true" style="min-width: 300px;">
-              <template #body="{ data }">
-                <div class="flex flex-column">
-                  <span class="font-medium">{{ data.food.name }}</span>
-                  <span class="text-sm text-gray-500">{{ data.food.brand }}</span>
-                </div>
-              </template>
-            </Column>
-
-            <Column header="Amount" style="width: 100px;">
-              <template #body="{ data }">
-                <InputNumber
-                  :model-value="data.amount"
-                  @update:model-value="updatePartAmount(data, $event)"
-                  :min="0"
-                  :max-fraction-digits="2"
-                  size="small"
-                  style="width: 80px;"
-                />
-              </template>
-            </Column>
-
-            <Column field="unit" header="Unit" style="min-width: 100px;">
-              <template #body="{ data }">
-                <span>{{ data.unit }}</span>
-              </template>
-            </Column>
-
-            <Column header="Calories" style="min-width: 100px;">
-              <template #body="{ data }">
-                <span>{{ data.calories }}</span>
-              </template>
-            </Column>
-
-            <Column header="Actions" style="min-width: 80px;">
-              <template #body="{ data }">
-                <Button
-                  severity="danger"
-                  outlined
-                  size="small"
-                  @click="removePart(data)"
-                  aria-label="Remove ingredient"
-                >
-                  <i class="material-symbols-outlined">delete</i>
-                </Button>
-              </template>
-            </Column>
-          </DataTable>
+        <!-- Nutritional Summary Section -->
+        <div class="flex flex-col">
+          <h4 class="m-0 mb-2">Nutritional Summary</h4>
+          <NutrientTotals :nutrients="totalNutrients" />
         </div>
-      </template>
-    </Card>
+      </div>
+
+      <Divider />
+
+      <!-- Ingredients Section -->
+      <div class="ingredients-section">
+        <div class="flex justify-between items-center mb-4">
+          <h4 class="m-0">Ingredients</h4>
+          <Button label="Add Ingredient" severity="success" outlined @click="openFoodPicker()">
+            <template #icon>
+              <i class="material-symbols-outlined">add</i>
+            </template>
+          </Button>
+        </div>
+
+        <div v-if="parts.length === 0" class="text-center px-4 py-4 bg-gray-50 rounded">
+          <i class="pi pi-info-circle text-2xl text-gray-400 mb-2"></i>
+          <p class="text-gray-600 m-0">No ingredients added yet. Click "Add Ingredient" to get started.</p>
+        </div>
+
+        <DataTable v-else :value="parts" class="ingredients-table" :paginator="false" responsive-layout="scroll">
+          <Column field="food.name" header="Food Name" :sortable="true" style="min-width: 300px;">
+            <template #body="{ data }">
+              <div class="flex flex-col">
+                <span class="font-medium">{{ data.food.name }}</span>
+                <span class="text-sm text-gray-500">{{ data.food.brand }}</span>
+              </div>
+            </template>
+          </Column>
+
+          <Column header="Amount" style="width: 100px;">
+            <template #body="{ data }">
+              <InputNumber :model-value="data.amount" @update:model-value="updatePartAmount(data, $event)" :min="0"
+                :max-fraction-digits="2" size="small" style="width: 80px;" />
+            </template>
+          </Column>
+
+          <Column field="unit" header="Unit" style="min-width: 100px;">
+            <template #body="{ data }">
+              <span>{{ data.unit }}</span>
+            </template>
+          </Column>
+
+          <Column header="Calories" style="min-width: 100px;">
+            <template #body="{ data }">
+              <span>{{ data.calories }}</span>
+            </template>
+          </Column>
+
+          <Column header="Actions" style="min-width: 80px;">
+            <template #body="{ data }">
+              <Button severity="danger" outlined size="small" @click="removePart(data)" aria-label="Remove ingredient">
+                <i class="material-symbols-outlined">delete</i>
+              </Button>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+    </div>
 
     <!-- Toast notifications -->
     <Toast />
-    
+
     <!-- Confirmation dialog -->
     <ConfirmDialog />
   </div>
@@ -499,7 +406,7 @@ function updatePartAmount(part: Part, newAmount: number) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 1.5rem;

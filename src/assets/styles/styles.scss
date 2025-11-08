@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css?family=Poppins:wght@100;300;500&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;300;500&display=swap");
 
-@import "./mixins.scss";
+// @import "./mixins.scss";
 
 
 // @import "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0,0";
@@ -26,14 +26,35 @@ $sodium-bg:    #7955481e;
 $sugar-bg:     #f4433615;
 $fiber-bg:     #9b27b015;
 
+// Export as CSS variables
+:root {
+  --protein-bg: #{$protein-bg};
+  --fat-bg: #{$fat-bg};
+  --carbs-bg: #{$carbs-bg};
+  --sodium-bg: #{$sodium-bg};
+  --sugar-bg: #{$sugar-bg};
+  --fiber-bg: #{$fiber-bg};
+}
+
+// Nutrient text color classes
+.text-protein { color: $protein; }
+.text-fat { color: $fat; }
+.text-carbs { color: $carbs; }
+.text-sodium { color: $sodium; }
+.text-sugar { color: $sugar; }
+.text-fiber { color: $fiber; }
+
+
+//  Var Overrides
+:root {
+  --p-card-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+  --p-card-shadow-raised: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
 
 
 //  Page Setup
 * {
   box-sizing: border-box;
-  position: relative;
-  margin: 0;
-  padding: 0;
 }
 
 html {
@@ -64,9 +85,6 @@ body {
   margin: 0 auto;
   width: clamp(300px, 98vw, 1200px);
 
-  @include tiny() {
-    width: 100%;
-  }
 }
 
 .grid {
@@ -82,6 +100,21 @@ body {
 
 :root {
   --p-card-shadow: none;
+}
+
+.card, .p-card {
+  transition: all 0.1s ease-out;
+  box-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2),
+              0px 3px 4px 0px rgba(0, 0, 0, 0.14),
+              0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+  background: var(--light-surface);
+
+  &:hover {
+    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+                0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+                0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
 }
 
 .p-card {

@@ -19,20 +19,17 @@ defineProps<{
     </div>
 
     <!-- Input Slot -->
-    <div class="form-control">
+    <div class="form-control" :class="{ error: error || $slots.error }">
       <slot name="input"></slot>
     </div>
 
     <!-- Error Message -->
-    <div v-if="$slots.error || error" class="form-error">
-      <slot name="error">
-        <span class="error-text">{{ error }}</span>
-      </slot>
-    </div>
+    <Transition name="error">
+      <div v-if="$slots.error || error" class="form-error">
+        <slot name="error">
+          <span class="error-text">{{ error }}</span>
+        </slot>
+      </div>
+    </Transition>
   </div>
 </template>
-
-<style scoped>
-/* Component-specific styles can go here if needed */
-/* Most styles come from form-styles.scss */
-</style>

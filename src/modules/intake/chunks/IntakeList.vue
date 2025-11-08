@@ -17,15 +17,14 @@ import Button from '@/modules/core/components/Button.vue';
 
 // Reactive state
 const loading = ref(false);
-const meals = ref<Meal[]>([]);
 const dailyIntakes = ref<DailyIntake[]>([]);
 const dailyGoals = ref<DailyGoals>({
   calories: 2000,
-  protein: 150,
-  fat: 65,
-  carbs: 250,
-  fiber: 30,
-  sodium: 2300
+  protein: 225,
+  fat: 111,
+  carbs: 25,
+  fiber: 25,
+  sodium: 3500
 });
 
 // Initialize filter options
@@ -70,11 +69,10 @@ async function loadMeals() {
   try {
     loading.value = true;
     await $meals.getList();
-    meals.value = $meals.list;
     processIntakes();
     initializeCharts();
   } catch (error) {
-    console.error('Failed to load meals:', error);
+    // Failed to load meals
   } finally {
     loading.value = false;
   }
@@ -82,31 +80,31 @@ async function loadMeals() {
 
 function processIntakes() {
   if (!options.value.range || !options.value.range.active) return;
-  
+
   const intakes: DailyIntake[] = [];
   const startDate = options.value.range.start;
   const endDate = options.value.range.end;
-  
+
   const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  
+
   for (let i = 0; i <= daysDiff; i++) {
     const currentDate = new Date(endDate);
     currentDate.setDate(endDate.getDate() - i);
     currentDate.setHours(0, 0, 0, 0);
-    
+
     const intake = new DailyIntake(currentDate);
-    
-    const dayMeals = meals.value.filter(meal => {
+
+    const dayMeals = $meals.list.filter(meal => {
       const mealDate = new Date(meal.date);
       mealDate.setHours(0, 0, 0, 0);
       return mealDate.getTime() === currentDate.getTime();
     });
-    
+
     intake.setMeals(dayMeals);
     intake.calculateTotals();
     intakes.push(intake);
   }
-  
+
   dailyIntakes.value = intakes;
 }
 
@@ -169,13 +167,6 @@ function handleFilterChange() {
       <template #title>Daily Intake</template>
       <template #actions>
         <Button
-          icon="pi pi-refresh"
-          severity="primary"
-          outlined
-          @click="refresh()"
-          aria-label="Refresh"
-        />
-        <Button
           label="Meal"
           icon="pi pi-plus"
           severity="success"
@@ -185,7 +176,7 @@ function handleFilterChange() {
     </HeaderRow>
 
     <!-- Filter Bar -->
-    <FilterBar :options="options" @change="handleFilterChange" />
+    <FilterBar :options="options" @filter-changed="handleFilterChange" @refresh="refresh" />
 
     <!-- Charts Section -->
     <div v-if="calorieChartData.length > 1 && macroChartData.length > 1" class="charts-section mb-5">
@@ -217,6 +208,7 @@ function handleFilterChange() {
       v-if="filteredIntakes.length > 0 && filteredIntakes[0].hasMeals"
       :intake="filteredIntakes[0]"
       :goals="dailyGoals"
+      :showSecondaryNutrients="false"
       @edit-goals="handleEditGoals"
     />
 

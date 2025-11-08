@@ -13,13 +13,14 @@ export const useWeightStore = defineStore("Weights", () => {
     options = o;
   }
 
-  watch(list, () => {
-    console.log("WeightStore.watch(list): ", list, options);
-  });
+  function getList(forceRefresh = false) {
+    // Return cached data if available and not forcing refresh
+    if (list.value.length > 0 && !forceRefresh) {
+      return Promise.resolve();
+    }
 
-  function getList() {
+    // Fetch from server
     return weight$.getListFromServer().then((l) => {
-      console.log("WeightStore.getList()", l);
       list.value = l;
     });
   }

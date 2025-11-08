@@ -25,7 +25,6 @@ export class ExerciseService extends BaseService {
       this.list = exercises;
       return exercises;
     } catch (error) {
-      console.error("Failed to fetch exercises from server:", error);
       throw error;
     }
   }
@@ -47,7 +46,6 @@ export class ExerciseService extends BaseService {
       const response = await this.getById<any>(id);
       return Exercise.fromPayload(response);
     } catch (error) {
-      console.error(`Failed to fetch exercise ${id}:`, error);
       throw error;
     }
   }
@@ -65,7 +63,6 @@ export class ExerciseService extends BaseService {
 
       return createdExercise;
     } catch (error) {
-      console.error("Failed to create exercise:", error);
       throw error;
     }
   }
@@ -84,7 +81,6 @@ export class ExerciseService extends BaseService {
 
       return updatedExercise;
     } catch (error) {
-      console.error("Failed to update exercise:", error);
       throw error;
     }
   }
@@ -96,7 +92,6 @@ export class ExerciseService extends BaseService {
       // Update local cache
       this.list = this.list.filter((e) => e.id !== exercise.id);
     } catch (error) {
-      console.error("Failed to delete exercise:", error);
       throw error;
     }
   }

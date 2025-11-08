@@ -23,7 +23,6 @@ const $foods = useFoodStore();
 // Reactive state
 const loading = ref(false);
 const searchTerm = ref('');
-const foods = ref<Food[]>([]);
 const selectedFoods = ref<Map<string, FoodSelection>>(new Map());
 
 // Get config from dialog data
@@ -32,10 +31,11 @@ const preselectedFoods = computed<FoodSelection[]>(() => $dialog.data?.preselect
 
 // Computed properties
 const filteredFoods = computed(() => {
-  if (!searchTerm.value) return foods.value;
-  
+  const allFoods = $foods.list;
+  if (!searchTerm.value) return allFoods;
+
   const term = searchTerm.value.toLowerCase();
-  return foods.value.filter(food => 
+  return allFoods.filter(food =>
     food.name.toLowerCase().includes(term) ||
     food.brand.toLowerCase().includes(term)
   );
@@ -58,10 +58,9 @@ onMounted(async () => {
 async function loadFoods(): Promise<void> {
   try {
     loading.value = true;
-    foods.value = await $foods.food$.getListFromServer();
+    await $foods.getList();
   } catch (error) {
-    console.error('Failed to load foods:', error);
-    foods.value = [];
+    // Failed to load foods
   } finally {
     loading.value = false;
   }
@@ -148,10 +147,10 @@ function getRowClass(data: Food) {
 </script>
 
 <template>
-  <div class="food-picker p-2">
+  <div class="food-picker px-3 py-3">
     <!-- Header with Actions -->
-    <div class="flex justify-content-between align-items-center mb-4">
-      <h4 class="m-0">Select Foods</h4>
+    <div class="flex justify-between items-center mb-4 px-0 py-3 border-b-2 border-gray-300">
+      <h3 class="m-0 text-primary">Select Foods</h3>
       <div class="flex gap-2">
         <Button
           label="Cancel"
@@ -160,7 +159,7 @@ function getRowClass(data: Food) {
           @click="cancel()"
         />
         <Button
-          :label="multiple ? `Add ${selectedFoods.size} Ingredient${selectedFoods.size !== 1 ? 's' : ''}` : 'Add Ingredient'"
+          :label="multiple ? `Add ${selectedFoods.size} Item${selectedFoods.size !== 1 ? 's' : ''}` : 'Add Item'"
           severity="success"
           @click="confirmSelection()"
           :disabled="!hasSelections"
@@ -199,21 +198,21 @@ function getRowClass(data: Food) {
         :row-class="getRowClass"
       >
         <template #empty>
-          <div class="text-center p-4">
+          <div class="text-center px-4 py-4">
             <i class="pi pi-search text-2xl text-gray-400 mb-2"></i>
             <p class="text-gray-600 m-0">No foods found matching your search.</p>
           </div>
         </template>
 
         <template #loading>
-          <div class="text-center p-4">Loading foods...</div>
+          <div class="text-center px-4 py-4">Loading foods...</div>
         </template>
 
-        <Column field="name" header="Food Name" :sortable="true" style="min-width: 200px;">
+        <Column field="name" header="Food Name" :sortable="true" style="min-width: 250px;">
           <template #body="{ data }">
-            <div class="flex flex-column" @click="toggleFoodSelection(data)">
-              <span class="font-medium">{{ data.name }}</span>
-              <span class="text-sm text-gray-500">{{ data.brand }}</span>
+            <div class="flex flex-col gap-1" @click="toggleFoodSelection(data)">
+              <span class="font-semibold">{{ data.name }}</span>
+              <span v-if="data.brand" class="text-sm text-gray-500">{{ data.brand }}</span>
             </div>
           </template>
         </Column>

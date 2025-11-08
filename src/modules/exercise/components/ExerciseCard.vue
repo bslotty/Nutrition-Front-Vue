@@ -21,31 +21,34 @@ const exerciseName = ExerciseName[props.exercise.name];
 <template>
     <div class="exercise-card" @click="handleClick">
         <!-- Exercise Name -->
-        <div class="flex justify-content-center p-2">
-            <h4 class="m-0 text-xl font-semibold">{{ exerciseName }}</h4>
+        <div class="flex justify-center px-2 py-2 border-b border-gray-200">
+            <h4 class="m-0 text-lg font-semibold">{{ exerciseName }}</h4>
         </div>
 
         <!-- Weight, Sets, Reps Row -->
-        <div class="flex justify-content-around p-2">
-            <div class="flex flex-column align-items-center gap-1">
-                <span class="text-xs text-color-secondary font-medium">Weight</span>
-                <span class="text-lg font-bold">{{ exercise.weight }}</span>
+        <div class="flex justify-around px-2 py-3">
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-xs text-gray-500 font-medium">Weight</span>
+                <span class="text-2xl font-bold">{{ exercise.weight }}</span>
             </div>
 
-            <div class="flex flex-column align-items-center gap-1">
-                <span class="text-xs text-color-secondary font-medium">Sets</span>
-                <span class="text-lg font-bold">{{ exercise.sets }}</span>
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-xs text-gray-500 font-medium">Sets</span>
+                <span class="text-2xl font-bold">{{ exercise.sets }}</span>
             </div>
 
-            <div class="flex flex-column align-items-center gap-1">
-                <span class="text-xs text-color-secondary font-medium">Reps</span>
-                <span class="text-lg font-bold">{{ exercise.reps }}</span>
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-xs text-gray-500 font-medium">Reps</span>
+                <span class="text-2xl font-bold">{{ exercise.reps }}</span>
             </div>
         </div>
 
         <!-- Total Weight -->
-        <div class="flex justify-content-center p-2 pt-0">
-            <h3 class="m-0 text-2xl font-bold text-primary">{{ exercise.getTotalWeightMoved() }} lbs</h3>
+        <div class="flex justify-center px-2 py-2 border-t border-gray-200">
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-xs text-gray-500 font-medium">Total Volume</span>
+                <h3 class="m-0 text-xl font-bold text-primary">{{ exercise.getTotalWeightMoved() }} lbs</h3>
+            </div>
         </div>
     </div>
 </template>

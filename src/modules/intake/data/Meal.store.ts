@@ -13,13 +13,14 @@ export const useMealStore = defineStore("meals", () => {
     options = o;
   }
 
-  watch(list, () => {
-    console.log("MealStore.watch(list): ", list, options);
-  });
+  function getList(forceRefresh = false): Promise<void> {
+    // Return cached data if available and not forcing refresh
+    if (list.value.length > 0 && !forceRefresh) {
+      return Promise.resolve();
+    }
 
-  function getList(): Promise<void> {
+    // Fetch from server
     return meal$.getListFromServer().then((l) => {
-      console.log("MealStore.getList()", l);
       list.value = l;
     });
   }

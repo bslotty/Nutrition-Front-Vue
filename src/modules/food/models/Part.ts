@@ -1,7 +1,7 @@
 import type { NutrientProfile } from "../interfaces/NutrientProfile";
 import { BaseFood } from "./BaseFood";
 import { Food } from "./Food";
-import { Recipe } from "./Recipe";
+import { Recipe } from "@/modules/recipes/models/Recipe";
 
 export class Part {
   public readonly id: string;
@@ -45,11 +45,13 @@ export class Part {
       ? Food.fromPayload(payload.food)
       : Recipe.fromPayload(payload.food);
 
-    return new Part(
+    const part = new Part(
       payload.id,
       food,
       payload.amount,
       payload.unit || payload.food.serving?.unit || ''
     );
+
+    return part;
   }
 }

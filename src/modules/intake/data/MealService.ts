@@ -14,26 +14,42 @@ export class MealService extends BaseService {
   async getListFromServer(start = 0, count = 25): Promise<Meal[]> {
     try {
       const response = await this.getList<any>(start, count);
-      
+
       // Verify ALL operations succeeded if array response
       if (Array.isArray(response)) {
-        const failedOperations = response.filter(op => !op.success);
-        if (failedOperations.length > 0) {
-          const errorMessages = failedOperations.map(op => op.message || 'Unknown error').join(', ');
-          throw new Error(`Operations failed: ${errorMessages}`);
+        // Check if this is a Response object array (with success/data) or direct meal array
+        const isResponseObject = response.length > 0 && 'success' in response[0] && 'data' in response[0];
+
+        if (isResponseObject) {
+          const failedOperations = response.filter(op => !op.success);
+          if (failedOperations.length > 0) {
+            const errorMessages = failedOperations.map(op => op.message || 'Unknown error').join(', ');
+            throw new Error(`Operations failed: ${errorMessages}`);
+          }
+
+          // Check if response has data
+          if (response.length > 0 && response[0]?.data && Array.isArray(response[0].data)) {
+            const meals = response[0].data.map(payload => Meal.fromPayload(payload));
+            this.list = meals;
+            return meals;
+          }
+        } else {
+          // Direct array of meals
+          const meals = response.map(payload => Meal.fromPayload(payload));
+          this.list = meals;
+          return meals;
         }
-        // Use the same data extraction as original
-        const meals = response[0].data.map(payload => Meal.fromPayload(payload));
-        this.list = meals;
-        return meals;
+
+        // Empty response
+        this.list = [];
+        return [];
       }
-      
-      // Fallback for non-array response  
+
+      // Fallback for non-array response
       const meals = response.map(payload => Meal.fromPayload(payload));
       this.list = meals;
       return meals;
     } catch (error) {
-      console.error('Failed to fetch meals from server:', error);
       throw error;
     }
   }
@@ -68,7 +84,6 @@ export class MealService extends BaseService {
       // Fallback for non-array response
       return Meal.fromPayload(response);
     } catch (error) {
-      console.error(`Failed to fetch meal ${id}:`, error);
       throw error;
     }
   }
@@ -104,7 +119,6 @@ export class MealService extends BaseService {
       }
       return createdMeal;
     } catch (error) {
-      console.error('Failed to create meal:', error);
       throw error;
     }
   }
@@ -142,7 +156,6 @@ export class MealService extends BaseService {
       }
       return updatedMeal;
     } catch (error) {
-      console.error('Failed to update meal:', error);
       throw error;
     }
   }
@@ -163,7 +176,6 @@ export class MealService extends BaseService {
       // Delete operation succeeded - update local cache
       this.list = this.list.filter(m => m.id !== meal.id);
     } catch (error) {
-      console.error('Failed to delete meal:', error);
       throw error;
     }
   }
@@ -195,7 +207,7 @@ export class MealService extends BaseService {
         const dataOperation = response.find(op => op.data && Array.isArray(op.data) && op.data.length > 0);
         return dataOperation?.data ? dataOperation.data.map(payload => Meal.fromPayload(payload)) : [];
       } catch (error) {
-        console.warn('Server search failed, falling back to local search:', error);
+        // Server search failed, falling back to local search
       }
     }
     

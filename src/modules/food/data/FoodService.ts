@@ -17,7 +17,6 @@ export class FoodService extends BaseService {
       this.list = foods;
       return foods;
     } catch (error) {
-      console.error('Failed to fetch foods from server:', error);
       throw error;
     }
   }
@@ -39,7 +38,6 @@ export class FoodService extends BaseService {
       const response = await this.getById<any>(id);
       return Food.fromPayload(response);
     } catch (error) {
-      console.error(`Failed to fetch food ${id}:`, error);
       throw error;
     }
   }
@@ -57,7 +55,6 @@ export class FoodService extends BaseService {
       
       return createdFood;
     } catch (error) {
-      console.error('Failed to create food:', error);
       throw error;
     }
   }
@@ -76,7 +73,6 @@ export class FoodService extends BaseService {
       
       return updatedFood;
     } catch (error) {
-      console.error('Failed to update food:', error);
       throw error;
     }
   }
@@ -88,7 +84,6 @@ export class FoodService extends BaseService {
       // Update local cache
       this.list = this.list.filter(f => f.id !== food.id);
     } catch (error) {
-      console.error('Failed to delete food:', error);
       throw error;
     }
   }
@@ -107,7 +102,7 @@ export class FoodService extends BaseService {
         const response = await this.sendRequest<any[]>();
         return response.map(payload => Food.fromPayload(payload));
       } catch (error) {
-        console.warn('Server search failed, falling back to local search:', error);
+        // Server search failed, falling back to local search
       }
     }
     
@@ -125,8 +120,8 @@ export class FoodService extends BaseService {
       name: food.name,
       brand: food.brand,
       servingSize: food.serving.size,
-      servingSizeMeasurementType: food.serving.unit,
-      
+      servingUnit: food.serving.unit,
+
       // Nutrients
       protein: food.nutrients.protein,
       fat: food.nutrients.fat,
@@ -134,7 +129,7 @@ export class FoodService extends BaseService {
       fiber: food.nutrients.fiber,
       sugar: food.nutrients.sugar,
       sodium: food.nutrients.sodium,
-      
+
       // Vitamins
       vitaminA: food.nutrients.vitaminA,
       vitaminB1: food.nutrients.vitaminB1,
@@ -149,7 +144,7 @@ export class FoodService extends BaseService {
       vitaminD: food.nutrients.vitaminD,
       vitaminE: food.nutrients.vitaminE,
       vitaminK: food.nutrients.vitaminK,
-      
+
       // Minerals
       calcium: food.nutrients.calcium,
       iron: food.nutrients.iron,

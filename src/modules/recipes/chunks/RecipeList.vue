@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { storeToRefs } from "pinia";
-import { useFoodStore } from "../data/Food.store";
-import FoodCard from "../components/FoodCard.vue";
+import { useRecipeStore } from "../data/Recipe.store";
+import RecipeCard from "../components/RecipeCard.vue";
 import FilterBar from "@/modules/core/components/FilterBar.vue";
 import HeaderRow from "@/modules/core/components/HeaderRow.vue";
 import ListContainer from "@/modules/core/components/ListContainer.vue";
@@ -11,19 +11,19 @@ import { useDialog } from "@/modules/core/data/dialog.store";
 import router from "@/router";
 
 const $dialog = useDialog();
-const $foods = useFoodStore();
-const { filteredList, options } = storeToRefs($foods);
+const $recipes = useRecipeStore();
+const { filteredList, options } = storeToRefs($recipes);
 
 onMounted(() => {
-  $foods.getList();
+  $recipes.getList();
 });
 
-function createFood() {
-  router.push({ path: `/food/create`, replace: true });
+function createRecipe() {
+  router.push({ path: `/recipe/create`, replace: true });
 }
 
 function refresh() {
-  $foods.getList(true);
+  $recipes.getList(true);
 }
 </script>
 
@@ -31,13 +31,13 @@ function refresh() {
   <div class="">
     <!-- Header Row -->
     <HeaderRow class="mb-3">
-      <template #title>Foods</template>
+      <template #title>Recipes</template>
       <template #actions>
         <Button
-          label="Food"
+          label="Recipe"
           icon="pi pi-plus"
           severity="success"
-          @click="createFood()"
+          @click="createRecipe()"
         />
       </template>
     </HeaderRow>
@@ -45,7 +45,7 @@ function refresh() {
     <!-- Filter Bar -->
     <FilterBar :options="options" @refresh="refresh" />
 
-    <!-- Food List -->
+    <!-- Recipe List -->
     <ListContainer
       :key="`${filteredList.length}-${options.sort.active}-${options.sort.direction}-${filteredList[0]?.id}`"
       :loading="false"
@@ -53,7 +53,7 @@ function refresh() {
       listClass="grid"
     >
       <template #list-item="{ item, index }">
-        <FoodCard :food="item" :style="{ '--i': index }" />
+        <RecipeCard :recipe="item" :style="{ '--i': index }" />
       </template>
     </ListContainer>
   </div>

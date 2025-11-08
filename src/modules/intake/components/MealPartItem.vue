@@ -44,7 +44,7 @@ function handleClick() {
 
 <template>
   <div class="meal-part-item">
-    <div class="part-main flex align-items-center gap-2 p-2 border-round hover:bg-gray-50 cursor-pointer" @click="toggleExpanded">
+    <div class="part-main flex align-items-center gap-2 px-2 py-2 border-round hover:bg-gray-50 cursor-pointer" @click="toggleExpanded">
       <i v-if="isRecipe" class="pi transition-transform" :class="expanded ? 'pi-chevron-down' : 'pi-chevron-right'" style="font-size: 0.75rem;"></i>
       <div v-else style="width: 12px;"></div>
       

@@ -71,40 +71,19 @@ function handleEditGoals() {
 </script>
 
 <template>
-  <Card class="daily-goals-summary mb-4">
-    <template #header>
-      <div class="goals-header p-3 flex justify-content-between align-items-center">
+  <div class="daily-goals-summary mb-4">
+      <div class="goals-header px-3 py-3 flex justify-content-between align-items-center">
         <div class="flex align-items-center gap-2">
           <h5 class="m-0">Daily Goals</h5>
-          <i 
-            class="pi text-xl" 
-            :class="statusConfig.icon" 
+          <i
+            class="pi text-xl"
+            :class="statusConfig.icon"
             :style="{ color: statusConfig.color }"
           ></i>
-          <span 
-            class="status-badge text-sm px-2 py-1 border-round" 
-            :style="{ 
-              backgroundColor: `${statusConfig.color}20`, 
-              color: statusConfig.color 
-            }"
-          >
-            {{ statusConfig.label }}
-          </span>
         </div>
-        
-        <Button 
-          label="Edit Goals" 
-          icon="pi pi-cog" 
-          text 
-          size="small" 
-          @click="handleEditGoals" 
-        />
       </div>
-    </template>
 
-    <template #content>
       <div class="primary-nutrients mb-4">
-        <h6 class="text-gray-600 mb-3">Primary Nutrients</h6>
         <div class="goals-grid">
           <NutrientGoalProgress 
             :current="intake.totals.calories" 
@@ -141,7 +120,6 @@ function handleEditGoals() {
         v-if="showSecondaryNutrients && (goals.fiber || goals.sodium)" 
         class="secondary-nutrients"
       >
-        <h6 class="text-gray-600 mb-3">Secondary Nutrients</h6>
         <div class="goals-grid">
           <NutrientGoalProgress 
             v-if="goals.fiber" 
@@ -161,26 +139,7 @@ function handleEditGoals() {
           />
         </div>
       </div>
-      
-      <div 
-        class="overall-summary mt-4 p-3 border-round" 
-        :style="{ 
-          backgroundColor: 'var(--surface-50)', 
-          borderLeft: `4px solid ${statusConfig.color}` 
-        }"
-      >
-        <div class="flex justify-content-between align-items-center">
-          <span class="font-medium">Overall Goal Progress</span>
-          <span 
-            class="font-bold text-xl" 
-            :style="{ color: statusConfig.color }"
-          >
-            {{ overallProgress }}%
-          </span>
-        </div>
-      </div>
-    </template>
-  </Card>
+  </div>
 </template>
 
 <style lang="scss" scoped>

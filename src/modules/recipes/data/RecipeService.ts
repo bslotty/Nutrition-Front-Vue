@@ -2,7 +2,7 @@ import type { RequestConfig } from "@/modules/core/interfaces/request_config";
 import type { ApiResponse } from "@/modules/core/interfaces/api_response";
 import { BaseService } from "@/modules/core/models/base_service";
 import { Recipe } from "../models/Recipe";
-import { Food } from "../models/Food";
+import { Food } from "@/modules/food/models/Food";
 
 export class RecipeService extends BaseService {
   list: Recipe[] = [];
@@ -15,26 +15,48 @@ export class RecipeService extends BaseService {
   async getListFromServer(start = 0, count = 25): Promise<Recipe[]> {
     try {
       const response = await this.getList<any>(start, count);
-      
+
       // Verify ALL operations succeeded if array response
       if (Array.isArray(response)) {
-        const failedOperations = response.filter(op => !op.success);
-        if (failedOperations.length > 0) {
-          const errorMessages = failedOperations.map(op => op.message || 'Unknown error').join(', ');
-          throw new Error(`Operations failed: ${errorMessages}`);
+        // Check if this is a Response object array (with success/data) or direct recipe array
+        const isResponseObject = response.length > 0 && 'success' in response[0] && 'data' in response[0];
+
+        if (isResponseObject) {
+          const failedOperations = response.filter(op => !op.success);
+          if (failedOperations.length > 0) {
+            const errorMessages = failedOperations.map(op => op.message || 'Unknown error').join(', ');
+            throw new Error(`Operations failed: ${errorMessages}`);
+          }
+
+          // Check if response has data
+          if (response.length > 0 && response[0]?.data && Array.isArray(response[0].data)) {
+            const recipes = response[0].data.map(payload => {
+              const recipe = Recipe.fromPayload(payload);
+              return recipe;
+            });
+            this.list = recipes;
+            return recipes;
+          }
+        } else {
+          // Direct array of recipes
+          const recipes = response.map(payload => {
+            const recipe = Recipe.fromPayload(payload);
+            return recipe;
+          });
+          this.list = recipes;
+          return recipes;
         }
-        // Use the same data extraction as original
-        const recipes = response[0].data.map(payload => Recipe.fromPayload(payload));
-        this.list = recipes;
-        return recipes;
+
+        // Empty response
+        this.list = [];
+        return [];
       }
-      
-      // Fallback for non-array response  
+
+      // Fallback for non-array response
       const recipes = response.map(payload => Recipe.fromPayload(payload));
       this.list = recipes;
       return recipes;
     } catch (error) {
-      console.error('Failed to fetch recipes from server:', error);
       throw error;
     }
   }
@@ -69,7 +91,6 @@ export class RecipeService extends BaseService {
       // Fallback for non-array response
       return Recipe.fromPayload(response);
     } catch (error) {
-      console.error(`Failed to fetch recipe ${id}:`, error);
       throw error;
     }
   }
@@ -105,7 +126,6 @@ export class RecipeService extends BaseService {
       }
       return createdRecipe;
     } catch (error) {
-      console.error('Failed to create recipe:', error);
       throw error;
     }
   }
@@ -143,7 +163,6 @@ export class RecipeService extends BaseService {
       }
       return updatedRecipe;
     } catch (error) {
-      console.error('Failed to update recipe:', error);
       throw error;
     }
   }
@@ -164,7 +183,6 @@ export class RecipeService extends BaseService {
       // Delete operation succeeded - update local cache
       this.list = this.list.filter(r => r.id !== recipe.id);
     } catch (error) {
-      console.error('Failed to delete recipe:', error);
       throw error;
     }
   }
@@ -196,7 +214,7 @@ export class RecipeService extends BaseService {
         const dataOperation = response.find(op => op.data && Array.isArray(op.data) && op.data.length > 0);
         return dataOperation?.data ? dataOperation.data.map(payload => Recipe.fromPayload(payload)) : [];
       } catch (error) {
-        console.warn('Server search failed, falling back to local search:', error);
+        // Server search failed, falling back to local search
       }
     }
     

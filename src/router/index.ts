@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import FoodList from '@/modules/food/chunks/FoodList.vue'
 import WeightList from '@/modules/weight/chunks/WeightList.vue'
 import FoodDetails from '@/modules/food/chunks/FoodDetails.vue'
-import RecipeDetails from '@/modules/food/chunks/RecipeDetails.vue'
+import RecipeList from '@/modules/recipes/chunks/RecipeList.vue'
+import RecipeDetails from '@/modules/recipes/chunks/RecipeDetails.vue'
 import IntakeList from '@/modules/intake/chunks/IntakeList.vue'
 import MealDetails from '@/modules/intake/chunks/MealDetails.vue'
 import ExerciseList from '@/modules/exercise/chunks/ExerciseList.vue'
@@ -25,6 +26,11 @@ const router = createRouter({
       path: "/food/:id",
       name: "food-details",
       component: FoodDetails,
+    },
+    {
+      path: "/recipe/list",
+      name: "recipe-list",
+      component: RecipeList,
     },
     {
       path: "/recipe/:id",

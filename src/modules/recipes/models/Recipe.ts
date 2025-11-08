@@ -1,9 +1,9 @@
-import type { FoodType } from "../interfaces/FoodType";
-import type { NutrientProfile } from "../interfaces/NutrientProfile";
-import type { ServingInfo } from "../interfaces/ServingInfo";
-import { BaseFood } from "./BaseFood";
-import { Food } from "./Food";
-import { Part } from "./Part";
+import type { FoodType } from "@/modules/food/interfaces/FoodType";
+import type { NutrientProfile } from "@/modules/food/interfaces/NutrientProfile";
+import type { ServingInfo } from "@/modules/food/interfaces/ServingInfo";
+import { BaseFood } from "@/modules/food/models/BaseFood";
+import { Food } from "@/modules/food/models/Food";
+import { Part } from "@/modules/food/models/Part";
 
 export class Recipe extends BaseFood {
   public readonly type: FoodType = 'compound';
@@ -28,6 +28,9 @@ export class Recipe extends BaseFood {
         recipe.parts.push(part);
       });
     }
+
+    // Calculate nutrients after loading all parts
+    recipe.updateNutrients();
 
     return recipe;
   }
@@ -59,15 +62,13 @@ export class Recipe extends BaseFood {
     return this;
   }
 
-  setParts(parts: Array<{ food: BaseFood, amount: number, unit: string }>): this {
-    this.parts = [];
-    parts.forEach(p => {
-      this.addPart(p.food, p.amount, p.unit);
-    });
+  setParts(parts: Part[]): this {
+    this.parts = parts;
+    this.updateNutrients();
     return this;
   }
 
-  private updateNutrients(): void {
+  public updateNutrients(): void {
     // Reset nutrients
     this._nutrients = this.createEmptyNutrients();
 

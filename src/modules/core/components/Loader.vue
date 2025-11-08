@@ -63,9 +63,3 @@
     </div>
   </div>
 </template>
-
-<style lang="scss">
-.loader-container {
-  width: 75px;
-}
-</style>

@@ -1,12 +1,11 @@
 import './assets/main.css'
-import 'primeicons/primeicons.css'  // 👈 Add this line
+import 'primeicons/primeicons.css'
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
 import { definePreset } from '@primeuix/themes';
-import Aura from '@primeuix/themes/aura';
-import 'primeflex/primeflex.css'  
+import Aura from '@primeuix/themes/aura';  
 
 import App from './App.vue';
 import router from './router';
@@ -146,7 +145,7 @@ app.use(PrimeVue, {
       darkModeSelector: '.dark',
       cssLayer: {
         name: 'primevue',
-        order: 'tailwind-base, primevue, tailwind-utilities'
+        order: 'base, primevue, utilities'
       }
     }
   }

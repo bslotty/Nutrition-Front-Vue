@@ -76,7 +76,7 @@ function handleDelete() {
         }
         $dialog.close();
       } catch (error) {
-        console.error('Failed to delete weight:', error);
+        // Failed to delete weight
       }
     }
   });
@@ -92,7 +92,7 @@ function handleKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="p-4">
+  <div class="px-4 py-4">
     <HeaderRow class="mb-3">
       <template #title>Weight Details</template>
       <template #actions>

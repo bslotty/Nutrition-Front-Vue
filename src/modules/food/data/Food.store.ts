@@ -25,7 +25,13 @@ export const useFoodStore = defineStore("foods", () => {
     return f;
   });
 
-  function getList() {
+  function getList(forceRefresh = false) {
+    // Return cached data if available and not forcing refresh
+    if (list.value.length > 0 && !forceRefresh) {
+      return Promise.resolve();
+    }
+
+    // Fetch from server
     return food$.getListFromServer().then((l) => {
       list.value = l;
     });

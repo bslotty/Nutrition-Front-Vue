@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import type { DailyIntake } from "../models/DailyIntake";
 import type { Meal } from "../models/Meal";
+import type { Part } from "@/modules/food/models/Part";
 import Card from 'primevue/card';
 import Button from 'primevue/button';
-import Divider from 'primevue/divider';
-import MealPartItem from "./MealPartItem.vue";
-import MealTotalsBar from "./MealTotalsBar.vue";
+import NutrientSummary from "@/modules/core/components/NutrientSummary.vue";
 
 interface Props {
   intake: DailyIntake;
@@ -19,14 +18,20 @@ const emit = defineEmits<{
   addMeal: [date: Date];
 }>();
 
+const expanded = ref(true);
+
 const formattedDate = computed(() => {
-  return props.intake.date.toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    month: 'long', 
+  return props.intake.date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
     day: 'numeric',
     year: 'numeric'
   });
 });
+
+function toggleExpand() {
+  expanded.value = !expanded.value;
+}
 
 function handleMealClick(meal: Meal) {
   emit('mealClick', meal);
@@ -35,119 +40,140 @@ function handleMealClick(meal: Meal) {
 function handleAddMeal() {
   emit('addMeal', props.intake.date);
 }
+
+function getNutrients(part: Part) {
+  return part.food.calculateNutrients(part.amount, part.unit);
+}
 </script>
 
 <template>
-  <Card class="daily-intake-card">
-    <template #header>
-      <div class="intake-header p-3 bg-primary-50">
-        <div class="flex justify-content-between align-items-center mb-3">
-          <h4 class="m-0">{{ formattedDate }}</h4>
-          <Button 
-            label="Add Meal" 
-            icon="pi pi-plus" 
-            size="small" 
-            outlined 
-            severity="success" 
-            @click="handleAddMeal" 
+  <div class="mb-6">
+      <!-- Day Header Row -->
+      <div class="intake-header-row">
+        <h4 class="m-0 text-xl font-semibold">{{ formattedDate }}</h4>
+        <NutrientSummary :nutrients="intake.totals" size="large" />
+        <div class="action-cell">
+          <Button
+            :icon="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+            text
+            rounded
+            @click="toggleExpand"
+            aria-label="Toggle expand"
           />
         </div>
-        
-        <MealTotalsBar 
-          :totals="intake.totals" 
-          :showBreakdown="true" 
-          size="medium" 
-        />
-      </div>
-    </template>
-
-    <template #content>
-      <div v-if="intake.meals.length === 0" class="empty-state text-center p-5">
-        <i class="pi pi-info-circle text-4xl text-gray-400 mb-3"></i>
-        <p class="text-gray-600 m-0">No meals recorded for this day</p>
-        <Button 
-          label="Add First Meal" 
-          icon="pi pi-plus" 
-          severity="success" 
-          class="mt-3" 
-          @click="handleAddMeal" 
-        />
       </div>
 
-      <div v-else class="meals-list">
-        <div 
-          v-for="(meal, index) in intake.meals" 
-          :key="meal.id" 
-          class="meal-section"
-        >
-          <div 
-            class="meal-header p-3 cursor-pointer hover:bg-gray-50 border-round transition-colors" 
-            @click="handleMealClick(meal)"
+      <!-- Meals -->
+      <div v-if="expanded">
+        <div v-if="intake.meals.length === 0" class="px-8 py-8 text-center flex flex-col items-center">
+          <p class="text-gray-600 m-0">No meals recorded for this day</p>
+          <Button
+            label="Add Meal"
+            icon="pi pi-plus"
+            severity="success"
+            size="small"
+            class="mt-2"
+            @click="handleAddMeal"
+          />
+        </div>
+
+        <div v-else>
+          <div
+            v-for="meal in intake.meals"
+            :key="meal.id"
+            class="mb-2 last:mb-0"
           >
-            <div class="flex justify-content-between align-items-center">
-              <h5 class="m-0">{{ meal.name }}</h5>
-              <Button 
-                icon="pi pi-chevron-right" 
-                text 
-                rounded 
-                size="small" 
-                severity="secondary" 
-              />
+            <!-- Meal Header Row -->
+            <div class="meal-header-row">
+              <h5 class="m-0 text-lg font-semibold">{{ meal.name }}</h5>
+              <NutrientSummary :nutrients="meal.totals" size="large" />
+              <div class="action-cell">
+                <Button
+                  icon="pi pi-pencil"
+                  text
+                  rounded
+                  severity="primary"
+                  @click="handleMealClick(meal)"
+                  aria-label="Edit meal"
+                />
+              </div>
+            </div>
+
+            <!-- Meal Parts/Contents -->
+            <div v-if="meal.parts && meal.parts.length > 0" class="bg-white">
+              <div
+                v-for="part in meal.parts"
+                :key="part.id"
+                class="part-row"
+              >
+                <div class="flex flex-col gap-1">
+                  <span class="font-medium">{{ part.food.name }}</span>
+                  <span v-if="part.food.brand" class="text-sm text-gray-500">{{ part.food.brand }}</span>
+                </div>
+                <NutrientSummary :nutrients="getNutrients(part)" size="large" />
+                <div class="action-cell"></div>
+              </div>
             </div>
           </div>
-          
-          <div v-if="meal.parts && meal.parts.length > 0" class="meal-parts ml-3">
-            <MealPartItem 
-              v-for="part in meal.parts" 
-              :key="part.id" 
-              :part="part" 
-              @view-details="handleMealClick(meal)" 
-            />
-          </div>
-
-          <div v-if="meal.parts && meal.parts.length > 1" class="meal-totals-section mt-3 ml-3">
-            <div class="totals-label text-sm font-semibold text-gray-600 mb-2">Meal Totals</div>
-            <MealTotalsBar 
-              :totals="meal.totals" 
-              :showBreakdown="false" 
-              size="small" 
-            />
-          </div>
-          
-          <Divider v-if="index < intake.meals.length - 1" />
         </div>
       </div>
-    </template>
-  </Card>
+    </div>
 </template>
 
-<style lang="scss" scoped>
-.daily-intake-card {
-  margin-bottom: 1.5rem;
-  
-  .intake-header {
-    border-bottom: 1px solid var(--surface-border);
-  }
-  
-  .meal-section {
-    .meal-parts {
-      padding-left: 0.5rem;
-      border-left: 2px solid var(--surface-border);
-    }
-    
-    .meal-totals-section {
-      padding: 1rem;
-      background: var(--surface-50);
-      border-radius: var(--border-radius);
-    }
-  }
-  
-  .empty-state {
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+<style scoped>
+:deep(.p-card-content) {
+  padding: 0 !important;
+}
+
+.intake-header-row,
+.meal-header-row,
+.part-row {
+  display: grid;
+  grid-template-columns: 3fr 0.5fr 0.5fr 0.5fr 0.5fr 60px;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.25rem 0rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.intake-header-row {
+  background: var(--bg-light);
+  border-bottom: 3px solid #333 !important;
+  font-weight: 600;
+  align-items: flex-end;
+}
+
+.intake-header-row > *:first-child {
+  padding-left: 0;
+}
+
+.meal-header-row {
+  background: var(--surface-50);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  align-items: flex-end;
+}
+
+.meal-header-row > *:first-child {
+  padding-left: 1rem;
+}
+
+.part-row {
+  border-bottom: 1px solid var(--surface-border);
+  transition: background-color 0.2s;
+}
+
+.part-row > *:first-child {
+  padding-left: 3rem;
+}
+
+.part-row:hover {
+  background: var(--surface-hover);
+}
+
+.action-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
+

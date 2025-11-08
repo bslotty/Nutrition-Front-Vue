@@ -103,16 +103,20 @@ export const useExerciseStore = defineStore("exercises", () => {
   });
 
   // Actions
-  async function getList(start = 0, count = 25): Promise<void> {
+  async function getList(start = 0, count = 25, forceRefresh = false): Promise<void> {
+    // Return cached data if available and not forcing refresh
+    if (list.value.length > 0 && !forceRefresh) {
+      return Promise.resolve();
+    }
+
     loading.value = true;
     error.value = null;
-    
+
     try {
       const exercises = await exerciseService.getListFromServer(start, count);
       list.value = exercises;
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load exercises';
-      console.error('Failed to load exercises:', err);
     } finally {
       loading.value = false;
     }
@@ -128,7 +132,6 @@ export const useExerciseStore = defineStore("exercises", () => {
       return exercise;
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load exercise';
-      console.error('Failed to load exercise:', err);
       return null;
     } finally {
       loading.value = false;
@@ -145,7 +148,6 @@ export const useExerciseStore = defineStore("exercises", () => {
       return createdExercise;
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to create exercise';
-      console.error('Failed to create exercise:', err);
       return null;
     } finally {
       loading.value = false;
@@ -168,7 +170,6 @@ export const useExerciseStore = defineStore("exercises", () => {
       return updatedExercise;
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to update exercise';
-      console.error('Failed to update exercise:', err);
       return null;
     } finally {
       loading.value = false;
@@ -188,7 +189,6 @@ export const useExerciseStore = defineStore("exercises", () => {
       return true;
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to delete exercise';
-      console.error('Failed to delete exercise:', err);
       return false;
     } finally {
       loading.value = false;
@@ -245,16 +245,6 @@ export const useExerciseStore = defineStore("exercises", () => {
     return exerciseService.getAverageWeight(exerciseName);
   }
 
-  // Watchers
-  watch(list, (newList) => {
-    console.log("ExerciseStore.watch(list): ", newList.length, "exercises loaded");
-  });
-
-  watch(error, (newError) => {
-    if (newError) {
-      console.error("ExerciseStore error:", newError);
-    }
-  });
 
   // Return store interface
   return {

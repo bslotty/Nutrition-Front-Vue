@@ -84,15 +84,6 @@ function formatDate(date: Date): string {
       <template #title>Exercise List</template>
       <template #actions>
         <Button
-          icon="pi pi-refresh"
-          severity="primary"
-          outlined
-          @click="refresh()"
-          :disabled="isLoading"
-          aria-label="Refresh"
-        />
-
-        <Button
           label="Exercise"
           icon="pi pi-plus"
           severity="success"
@@ -103,9 +94,11 @@ function formatDate(date: Date): string {
     </HeaderRow>
 
     <!-- Filter Bar -->
-    <FilterBar 
-      :options="options" 
-      @filter-changed="handleFilterChange" 
+    <FilterBar
+      :options="options"
+      :show-sort="false"
+      @filter-changed="handleFilterChange"
+      @refresh="refresh"
     />
 
     <!-- Workout List -->

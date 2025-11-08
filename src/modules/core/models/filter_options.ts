@@ -35,17 +35,18 @@ export class FilterOptions {
 
   searchList<T>(list: T[]): T[] {
     if (this.search == "") return list;
-    
+
     const terms = this.search.split(',').map(t => t.trim().toLowerCase()).filter(t => t.length > 0);
-    
+
     if (terms.length === 0) return list;
-    
-    const filtered = list.filter((item) => {
-      const itemString = JSON.stringify(item).toLowerCase();
-      const matches = terms.every(term => itemString.indexOf(term) > -1);
+
+    const filtered = list.filter((item: any) => {
+      // Search only in name and brand fields
+      const searchableText = `${item.name || ''} ${item.brand || ''}`.toLowerCase();
+      const matches = terms.every(term => searchableText.indexOf(term) > -1);
       return matches;
     });
-    
+
     return filtered;
   }
 

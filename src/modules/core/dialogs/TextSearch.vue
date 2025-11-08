@@ -49,7 +49,7 @@ function handleKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="p-4">
+  <div class="px-4 py-4">
     <HeaderRow class="mb-3">
       <template #title>Search For</template>
       <template #actions>

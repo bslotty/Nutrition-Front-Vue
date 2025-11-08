@@ -8,12 +8,14 @@ import Chip from "primevue/chip";
 import { FilterOptions } from "../models/filter_options";
 import { SortDirection } from "../models/sort";
 
-const { options } = defineProps<{ 
+const { options, showSort = true } = defineProps<{
   options: FilterOptions;
+  showSort?: boolean;
 }>();
 
 const emit = defineEmits<{
   'filter-changed': [];
+  'refresh': [];
 }>();
 
 // Local state
@@ -54,12 +56,10 @@ const sortOptions = computed(() => {
 // Methods
 function flipSortDirection() {
   options.sort.direction = isAscending.value ? SortDirection.Desc : SortDirection.Asc;
-  console.log('🔔 EMIT filter-changed (flipSortDirection)');
   emit('filter-changed');
 }
 
 function onSortColumnChange() {
-  console.log('🔔 EMIT filter-changed (onSortColumnChange)');
   emit('filter-changed');
 }
 
@@ -72,7 +72,6 @@ function addSearchTerm() {
       options.search = term;
     }
     newSearchTerm.value = "";
-    console.log('🔔 EMIT filter-changed (addSearchTerm)');
     emit('filter-changed');
   }
 }
@@ -80,14 +79,12 @@ function addSearchTerm() {
 function removeSearchTerm(term: string) {
   const terms = activeSearchTerms.value.filter(t => t !== term);
   options.search = terms.join(',');
-  console.log('🔔 EMIT filter-changed (removeSearchTerm)');
   emit('filter-changed');
 }
 
 function onDateRangeChange() {
   if (options.range) {
     options.range.active = true;
-    console.log('🔔 EMIT filter-changed (onDateRangeChange)');
     emit('filter-changed');
   }
 }
@@ -98,15 +95,18 @@ function page(dir: "next" | "prev") {
   } else {
     options.page.prevResults();
   }
-  console.log('🔔 EMIT filter-changed (page)');
   emit('filter-changed');
+}
+
+function refresh() {
+  emit('refresh');
 }
 </script>
 
 <template>
-  <div class="flex justify-content-between align-items-center gap-1 mb-2">
-    <!-- Left Section: Sort, Date Range, Filter Chips -->
-    <div class="flex align-items-center gap-1 flex-1 overflow-x-auto">
+  <div class="flex justify-between items-center gap-2 mb-2">
+    <!-- Left Section: Sort with Direction -->
+    <div v-if="showSort" class="flex items-center gap-1">
       <!-- Sort Dropdown -->
       <Dropdown
         v-if="options.sort"
@@ -115,11 +115,11 @@ function page(dir: "next" | "prev") {
         optionLabel="label"
         optionValue="value"
         placeholder="Sort..."
-        size="small"
-        class="w-8rem"
+        size="large"
+        style="width: 130px;"
         @change="onSortColumnChange"
       />
-      
+
       <!-- Sort Direction Button -->
       <Button
         v-if="options.sort"
@@ -129,34 +129,35 @@ function page(dir: "next" | "prev") {
         text
         @click="flipSortDirection"
       />
+    </div>
 
-      <!-- Date Range Start -->
+    <!-- Date Range Section -->
+    <div v-if="options.range" class="flex items-center gap-1">
       <DatePicker
-        v-if="options.range"
         v-model="options.range.start"
         dateFormat="yy-mm-dd"
         placeholder="From"
         showIcon
         iconDisplay="input"
-        size="small"
-        class="w-8rem"
+        size="large"
+        style="width: 140px;"
         @update:modelValue="onDateRangeChange"
       />
-      
-      <!-- Date Range End -->
+
       <DatePicker
-        v-if="options.range"
         v-model="options.range.end"
         dateFormat="yy-mm-dd"
         placeholder="To"
         showIcon
         iconDisplay="input"
-        size="small"
-        class="w-8rem"
+        size="large"
+        style="width: 140px;"
         @update:modelValue="onDateRangeChange"
       />
+    </div>
 
-      <!-- Active Search Filter Chips (NO DATE CHIP) -->
+    <!-- Middle Section: Active Search Filter Chips (Growable) -->
+    <div class="flex items-center gap-1 flex-1 overflow-x-auto">
       <Chip
         v-for="term in activeSearchTerms"
         :key="term"
@@ -167,37 +168,14 @@ function page(dir: "next" | "prev") {
       />
     </div>
 
-    <!-- Right Section: Pagination & Search Input -->
-    <div class="flex align-items-center gap-1 flex-shrink-0">
-      <!-- Pagination -->
-      <div v-if="options.page.enabled" class="flex align-items-center gap-1">
-        <Button
-          icon="pi pi-chevron-left"
-          severity="secondary"
-          size="small"
-          text
-          :disabled="options.page.current_page === 1"
-          @click="page('prev')"
-        />
-        <span class="text-xs text-600 white-space-nowrap px-1">
-          {{ options.page.current_page }}/{{ options.page.page_limit }}
-        </span>
-        <Button
-          icon="pi pi-chevron-right"
-          severity="secondary"
-          size="small"
-          text
-          :disabled="options.page.current_page >= options.page.page_limit"
-          @click="page('next')"
-        />
-      </div>
-
+    <!-- Right Section: Search Input & Actions -->
+    <div class="flex items-center gap-1 flex-shrink-0">
       <!-- Search Input -->
       <InputText
         v-model="newSearchTerm"
         placeholder="Filter..."
         size="small"
-        class="w-8rem"
+        style="width: 130px;"
         @keydown.enter="addSearchTerm"
       />
       <Button
@@ -207,10 +185,16 @@ function page(dir: "next" | "prev") {
         :disabled="newSearchTerm.trim().length === 0"
         @click="addSearchTerm"
       />
+
+      <!-- Refresh Button -->
+      <Button
+        icon="pi pi-refresh"
+        severity="secondary"
+        size="small"
+        text
+        @click="refresh"
+        aria-label="Refresh"
+      />
     </div>
   </div>
 </template>
-
-<style scoped>
-
-</style>

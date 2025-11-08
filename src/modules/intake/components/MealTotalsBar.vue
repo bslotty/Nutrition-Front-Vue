@@ -42,7 +42,7 @@ const sizeClasses = computed(() => {
 
 <template>
   <div class="meal-totals-bar" :class="sizeClasses.container">
-    <div class="totals-content flex align-items-center justify-content-between gap-3 p-3 bg-gray-50 border-round">
+    <div class="totals-content flex align-items-center justify-content-between gap-3 px-3 py-3 bg-gray-50 border-round">
       <div class="calories-display">
         <span class="font-bold text-primary" :class="sizeClasses.calories">
           {{ Math.round(totals.calories) }}

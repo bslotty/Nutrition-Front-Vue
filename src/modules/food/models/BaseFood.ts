@@ -78,9 +78,12 @@ export abstract class BaseFood {
     amount: number,
     unit: string = this._serving.unit
   ): NutrientProfile {
-    if (this._serving.size === 0) return this.createEmptyNutrients();
+    if (this._serving.size === 0) {
+      return this.createEmptyNutrients();
+    }
 
     const multiplier = amount / this._serving.size;
+
     const calculated = {} as NutrientProfile;
 
     Object.keys(this._nutrients).forEach((key) => {

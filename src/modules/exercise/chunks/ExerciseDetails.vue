@@ -7,8 +7,7 @@ import { ExerciseName } from '../enums/ExerciseNames';
 import { ExerciseType } from '../enums/ExerciseTypes';
 import HeaderRow from '@/modules/core/components/HeaderRow.vue';
 import FormInput from '@/modules/core/components/FormInput.vue';
-import Button from '@/modules/core/components/Button.vue';
-import { MatColor } from '@/modules/core/enums/mat_color';
+import Button from 'primevue/button';
 import InputNumber from 'primevue/inputnumber';
 import Dropdown from 'primevue/dropdown';
 import Calendar from 'primevue/calendar';
@@ -45,12 +44,18 @@ const errors = ref({
 const isCreate = computed(() => route.params.id === 'create');
 const isValid = computed(() => {
     return !!(
-        form.value.name !== undefined && 
-        form.value.date && 
+        form.value.name !== undefined &&
+        form.value.date &&
         form.value.sets > 0
     );
 });
 const isLoading = computed(() => exerciseStore.loading);
+
+const saveButtonProps = computed(() => ({
+    severity: 'success',
+    disabled: !isValid.value || isLoading.value,
+    loading: isLoading.value
+}));
 
 // Prepare dropdown options
 const exerciseNameOptions = computed(() => {
@@ -159,7 +164,6 @@ async function save() {
             router.push({ name: 'exercise-list' });
         }
     } catch (error) {
-        console.error('Failed to save exercise:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -197,7 +201,6 @@ async function remove() {
                     }
                 }
             } catch (error) {
-                console.error('Failed to delete exercise:', error);
                 toast.add({
                     severity: 'error',
                     summary: 'Error',
@@ -218,137 +221,70 @@ async function remove() {
                 {{ isCreate ? 'New Exercise' : 'Edit Exercise' }}
             </template>
             <template #actions>
-                <Button
-                    :iconName="isCreate ? 'close' : 'delete'"
-                    :iconColor="isCreate ? MatColor.primary : MatColor.warn"
-                    :bgColor="MatColor.transparent"
-                    @click="remove()"
-                    :aria-label="isCreate ? 'Cancel' : 'Delete exercise'"
-                />
-                <Button
-                    label="Save"
-                    iconName="check"
-                    :iconColor="isValid ? MatColor.accent : MatColor.primary"
-                    :bgColor="isValid ? MatColor.primary : MatColor.transparent"
-                    @click="save()"
-                    :aria-label="isCreate ? 'Create exercise' : 'Save exercise'"
-                />
+                <Button v-if="!isCreate" icon="pi pi-trash" severity="danger" outlined @click="remove()"
+                    :disabled="isLoading" aria-label="Delete exercise" />
+                <Button label="Save" icon="pi pi-check" v-bind="saveButtonProps" @click="save()"
+                    :aria-label="isCreate ? 'Create exercise' : 'Save exercise'" />
             </template>
         </HeaderRow>
 
-        <Card class="exercise-details-card">
-            <template #content>
-                <!-- Two Column Layout -->
-                <div class="exercise-grid">
-                    <!-- Column 1: Name and Date -->
-                    <div class="form-column-left">
-                        <!-- Row 1: Exercise Name -->
-                        <FormInput
-                            label="Exercise Name"
-                            :required="true"
-                            :error="errors.name"
-                            html-for="exercise-name"
-                        >
-                            <template #input>
-                                <Dropdown
-                                    id="exercise-name"
-                                    v-model="form.name"
-                                    :options="exerciseNameOptions"
-                                    option-label="label"
-                                    option-value="value"
-                                    placeholder="Select exercise..."
-                                    :disabled="isLoading"
-                                />
-                            </template>
-                        </FormInput>
+        <div>
+            <!-- Two Column Layout -->
+            <div class="exercise-grid">
+                <!-- Column 1: Name and Date -->
+                <div class="form-column-left">
+                    <!-- Row 1: Exercise Name -->
+                    <FormInput label="Exercise Name" :required="true" :error="errors.name" html-for="exercise-name">
+                        <template #input>
+                            <Dropdown id="exercise-name" v-model="form.name" :options="exerciseNameOptions"
+                                option-label="label" option-value="value" placeholder="Select exercise..."
+                                :disabled="isLoading" />
+                        </template>
+                    </FormInput>
 
-                        <!-- Row 2: Date -->
-                        <FormInput
-                            label="Date"
-                            :required="true"
-                            :error="errors.date"
-                            html-for="exercise-date"
-                        >
-                            <template #input>
-                                <Calendar
-                                    id="exercise-date"
-                                    v-model="form.date"
-                                    date-format="mm/dd/yy"
-                                    :disabled="isLoading"
-                                />
-                            </template>
-                        </FormInput>
-                    </div>
-
-                    <!-- Column 2: Weight, Sets, Reps and Notes -->
-                    <div class="form-column-right">
-                        <!-- Row 1: Weight, Sets, Reps in one row -->
-                        <div class="metrics-row">
-                            <FormInput
-                                label="Weight (lbs)"
-                                html-for="exercise-weight"
-                            >
-                                <template #input>
-                                    <InputNumber
-                                        id="exercise-weight"
-                                        v-model="form.weight"
-                                        :min="0"
-                                        :disabled="isLoading"
-                                        suffix=" lbs"
-                                    />
-                                </template>
-                            </FormInput>
-
-                            <FormInput
-                                label="Sets"
-                                :required="true"
-                                :error="errors.sets"
-                                html-for="exercise-sets"
-                            >
-                                <template #input>
-                                    <InputNumber
-                                        id="exercise-sets"
-                                        v-model="form.sets"
-                                        :min="0"
-                                        :disabled="isLoading"
-                                    />
-                                </template>
-                            </FormInput>
-
-                            <FormInput
-                                label="Reps"
-                                html-for="exercise-reps"
-                            >
-                                <template #input>
-                                    <InputNumber
-                                        id="exercise-reps"
-                                        v-model="form.reps"
-                                        :min="0"
-                                        :disabled="isLoading"
-                                    />
-                                </template>
-                            </FormInput>
-                        </div>
-
-                        <!-- Row 2: Notes -->
-                        <FormInput
-                            label="Notes"
-                            html-for="exercise-feedback"
-                        >
-                            <template #input>
-                                <Textarea
-                                    id="exercise-feedback"
-                                    v-model="form.feedback"
-                                    :rows="4"
-                                    placeholder="How did it feel? Any observations?"
-                                    :disabled="isLoading"
-                                />
-                            </template>
-                        </FormInput>
-                    </div>
+                    <!-- Row 2: Date -->
+                    <FormInput label="Date" :required="true" :error="errors.date" html-for="exercise-date">
+                        <template #input>
+                            <Calendar id="exercise-date" v-model="form.date" date-format="mm/dd/yy"
+                                :disabled="isLoading" />
+                        </template>
+                    </FormInput>
                 </div>
-            </template>
-        </Card>
+
+                <!-- Column 2: Weight, Sets, Reps and Notes -->
+                <div class="form-column-right">
+                    <!-- Row 1: Weight, Sets, Reps in one row -->
+                    <div class="metrics-row">
+                        <FormInput label="Weight (lbs)" html-for="exercise-weight">
+                            <template #input>
+                                <InputNumber id="exercise-weight" v-model="form.weight" :min="0" :disabled="isLoading"
+                                    suffix=" lbs" />
+                            </template>
+                        </FormInput>
+
+                        <FormInput label="Sets" :required="true" :error="errors.sets" html-for="exercise-sets">
+                            <template #input>
+                                <InputNumber id="exercise-sets" v-model="form.sets" :min="0" :disabled="isLoading" />
+                            </template>
+                        </FormInput>
+
+                        <FormInput label="Reps" html-for="exercise-reps">
+                            <template #input>
+                                <InputNumber id="exercise-reps" v-model="form.reps" :min="0" :disabled="isLoading" />
+                            </template>
+                        </FormInput>
+                    </div>
+
+                    <!-- Row 2: Notes -->
+                    <FormInput label="Notes" html-for="exercise-feedback">
+                        <template #input>
+                            <Textarea id="exercise-feedback" v-model="form.feedback" :rows="4"
+                                placeholder="How did it feel? Any observations?" :disabled="isLoading" />
+                        </template>
+                    </FormInput>
+                </div>
+            </div>
+        </div>
 
         <!-- Toast notifications -->
         <Toast />
@@ -360,34 +296,34 @@ async function remove() {
 
 <style lang="scss" scoped>
 .exercise-details-card {
-  max-width: 1200px;
-  margin: 0 auto;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .exercise-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
 }
 
 .form-column-left,
 .form-column-right {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
 }
 
 .metrics-row {
-  display: flex;
-  gap: 1rem;
+    display: flex;
+    gap: 1rem;
 
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
+    @media (max-width: 768px) {
+        flex-direction: column;
+    }
 }
 </style>

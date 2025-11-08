@@ -82,7 +82,3 @@ function parseClick(point: string) {
     />
   </div>
 </template>
-
-<style scoped>
-
-</style>

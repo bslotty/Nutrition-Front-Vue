@@ -6,12 +6,12 @@ export class Food extends BaseFood {
 
   static fromPayload(payload: any): Food {
     const food = new Food(payload.id);
-    return food
+    const result = food
       .setName(payload.name || "")
       .setBrand(payload.brand || "")
       .setServing(
         +payload.servingSize || 0,
-        payload.servingSizeMeasurementType || ""
+        payload.servingUnit || ""
       )
       .setNutrients({
         protein   : +payload.protein || 0,
@@ -39,6 +39,8 @@ export class Food extends BaseFood {
         potassium : +payload.potassium || 0,
         zinc      : +payload.zinc || 0,
       });
+
+    return result;
   }
 
   // Builder pattern methods for easy construction

@@ -6,16 +6,17 @@ import Button from 'primevue/button';
 interface NavItem {
   name: string;
   label: string;
-  severity: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'help' | 'danger' | 'protein';
+  severity: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger';
 }
 
 const route = useRoute();
 
 const navItems: NavItem[] = [
-  { name: 'food-list', label: 'Foods', severity: 'primary' },
+  { name: 'food-list', label: 'Foods', severity: 'danger' },
+  { name: 'recipe-list', label: 'Recipes', severity: 'warn' },
   { name: 'intake-list', label: 'Intake', severity: 'primary' },
-  { name: 'weight-list', label: 'Weight', severity: 'primary' },
-  { name: 'exercise-list', label: 'Exercise', severity: 'primary' }
+  { name: 'weight-list', label: 'Weight', severity: 'info' },
+  { name: 'exercise-list', label: 'Exercise', severity: 'success' }
 ];
 
 function navigateTo(routeName: string): void {
@@ -28,9 +29,9 @@ function isCurrentRoute(routeName: string): boolean {
 </script>
 
 <template>
-  <nav class="f-row wrap j-between a-center py-3">
+  <nav class="flex flex-row flex-wrap justify-between items-center py-3">
     <h1>Nutrition</h1>
-    <div class="f-row wrap g-3">
+    <div class="flex flex-row flex-wrap gap-3">
       <Button
         v-for="item in navItems"
         :key="item.name"
@@ -42,5 +43,5 @@ function isCurrentRoute(routeName: string): boolean {
       />
     </div>
   </nav>
-  <hr class="thick mat-warn" />
+  <hr class="m-0 border-t-4 border-[var(--color-warn)]" />
 </template>

@@ -55,43 +55,28 @@ const remainingAmount = computed(() => {
 
 <template>
   <div class="nutrient-goal-progress">
-    <div class="flex justify-content-between align-items-center mb-2">
-      <div class="label-section">
-        <span class="label font-medium" :style="{ color: color }">{{ label }}</span>
-        <span 
-          class="status-label text-xs ml-2" 
-          :class="`status-${progressStatus}`"
-        >
-          {{ statusLabel }}
-        </span>
-      </div>
-      
-      <div class="values text-sm">
+    <div class="mb-2">
+      <span class="label font-medium" :style="{ color: color }">{{ label }}</span>
+    </div>
+
+    <ProgressBar
+      :value="percentage"
+      :show-value="false"
+      :style="{
+        '--p-progressbar-value-background': progressColor,
+        height: '1rem'
+      }"
+    />
+
+    <div class="flex justify-content-between align-items-center mt-2 text-sm">
+      <div class="values">
         <span class="current font-semibold" :style="{ color: progressColor }">
           {{ current.toFixed(1) }}
         </span>
         <span class="separator text-gray-400 mx-1">/</span>
-        <span class="goal text-gray-600">{{ goal.toFixed(1) }} {{ unit }}</span>
+        <span class="goal text-gray-600">{{ goal.toFixed(1) }}</span>
       </div>
-    </div>
-    
-    <ProgressBar 
-      :value="percentage" 
-      :show-value="showPercentage" 
-      :style="{ 
-        '--p-progressbar-value-background': progressColor, 
-        height: '1rem' 
-      }" 
-    />
-    
-    <div class="footer-info flex justify-content-between align-items-center mt-1 text-xs text-gray-500">
-      <span v-if="remainingAmount > 0">
-        {{ remainingAmount.toFixed(1) }} {{ unit }} remaining
-      </span>
-      <span v-else class="text-danger">
-        {{ Math.abs(current - goal).toFixed(1) }} {{ unit }} over
-      </span>
-      <span v-if="showPercentage">{{ percentage }}%</span>
+      <span class="unit text-gray-600 font-medium">{{ unit }}</span>
     </div>
   </div>
 </template>

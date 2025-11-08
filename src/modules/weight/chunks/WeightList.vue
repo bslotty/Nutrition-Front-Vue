@@ -36,13 +36,13 @@ onMounted(async () => {
   await loadWeights();
 });
 
-async function loadWeights() {
+async function loadWeights(forceRefresh = false) {
   try {
     loading.value = true;
-    await $weight.getList();
+    await $weight.getList(forceRefresh);
     refreshList();
   } catch (error) {
-    console.error('Failed to load weights:', error);
+    // Failed to load weights
   } finally {
     loading.value = false;
   }
@@ -54,6 +54,10 @@ function refreshList() {
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .map((w) => [new Date(w.date), +w.pounds]);
   chart.value.unshift(["Date", "Pounds"]);
+}
+
+async function refresh() {
+  await loadWeights(true);
 }
 
 function view(weight: Weight = new Weight("create", new Date(), 0)) {
@@ -102,7 +106,7 @@ function selectedRow(e: number) {
     </HeaderRow>
 
     <!-- Filter Bar -->
-    <FilterBar :options="options" @filter-changed="refreshList" />
+    <FilterBar :options="options" :show-sort="false" @filter-changed="refreshList" @refresh="refresh" />
 
     <!-- Chart -->
     <div v-if="chart.length > 1" class="mb-3">
